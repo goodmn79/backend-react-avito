@@ -19,8 +19,8 @@ public class AdController {
     }
 
     @PostMapping
-    public Ad addAd(@RequestPart("image") MultipartFile image,
-                    @RequestPart("properties") CreateOrUpdateAd createOrUpdateAd) {
+    public Ad addAd(@RequestParam("image") MultipartFile image,
+                    @RequestParam("properties") CreateOrUpdateAd createOrUpdateAd) {
         return new Ad();
     }
 
@@ -47,7 +47,7 @@ public class AdController {
 
     @PatchMapping("/{id}/image")
     public byte[] updateImage(@PathVariable("id") long id,
-                              @RequestPart("image") MultipartFile image) throws IOException {
+                              @RequestParam("image") MultipartFile image) throws IOException {
         return image.getBytes();
     }
 
