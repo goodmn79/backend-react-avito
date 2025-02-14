@@ -1,0 +1,48 @@
+name: Generate Javadoc
+
+on:
+  push:
+    branches:
+      - dev  # Запускать действие при пуше в ветку dev
+
+jobs:
+  generate-javadoc:
+    runs-on: ubuntu-latest
+    steps:
+      # Шаг 1: Клонируем репозиторий
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Шаг 2: Устанавливаем JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      # Шаг 3: Генерируем Javadoc с помощью Maven
+      - name: Generate Javadoc
+        run: mvn javadoc:javadoc -DskipTests
+
+      # Шаг 4: Клонируем ветку gh-pages для обновления
+      - name: Checkout gh-pages branch
+        run: |
+          git fetch origin
+          git checkout gh-pages || git checkout --orphan gh-pages
+
+      # Шаг 5: Удаляем только старые файлы javadoc в ветке gh-pages
+      - name: Remove old Javadoc
+        run: rm -rf docs/javadoc/
+
+      # Шаг 5: Копируем сгенерированный Javadoc в директорию для gh-pages
+      - name: Copy new Javadoc to gh-pages
+        run: |
+          cp -r target/docs/* docs/javadoc/  
+
+      # Шаг 6: Коммитим и пушим изменения на ветку gh-pages
+      - name: Commit and push Javadoc to gh-pages
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add docs/javadoc/
+          git commit -m "Update Javadoc" || echo "No changes to commit"
+          git push origin gh-pages
