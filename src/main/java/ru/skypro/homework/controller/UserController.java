@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestPart("image")  MultipartFile image) throws IOException {
+    public void updateUserImage(@RequestParam("image")  MultipartFile image) throws IOException {
     }
 
 }
