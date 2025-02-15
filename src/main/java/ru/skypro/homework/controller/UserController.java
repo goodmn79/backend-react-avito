@@ -6,6 +6,8 @@ import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.UpdateUser;
 import ru.skypro.homework.dto.User;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -25,7 +27,7 @@ public class UserController {
     }
 
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestBody MultipartFile image) {
+    public void updateUserImage(@RequestParam("image")  MultipartFile image) throws IOException {
     }
 
 }
