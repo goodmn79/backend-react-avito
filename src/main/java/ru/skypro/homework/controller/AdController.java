@@ -19,8 +19,8 @@ public class AdController {
     }
 
     @PostMapping
-    public Ad addAd(@RequestParam("image") MultipartFile image,
-                    @RequestParam("properties") CreateOrUpdateAd createOrUpdateAd) {
+    public Ad addAd(@RequestPart("image") MultipartFile image,
+                    @RequestPart("properties") CreateOrUpdateAd createOrUpdateAd) {
         return new Ad();
     }
 
