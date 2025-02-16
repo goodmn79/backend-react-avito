@@ -1,9 +1,9 @@
 package ru.skypro.homework.controller;
 
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.Comment;
-import ru.skypro.homework.dto.Comments;
-import ru.skypro.homework.dto.CreateOrUpdateComment;
+import ru.skypro.homework.dto.comment.Comment;
+import ru.skypro.homework.dto.comment.Comments;
+import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
 
 import java.util.Collections;
 import java.util.List;
