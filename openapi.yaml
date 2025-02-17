@@ -153,6 +153,7 @@ paths:
                 $ref: '#/components/schemas/Ad'
         '401':
           description: Unauthorized
+
   /ads/{id}/comments:
     get:
       tags:
