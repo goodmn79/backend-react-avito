@@ -20,7 +20,7 @@ public class AdEntity {
 }
 
 /*  //Связь с таблицей UserEntity
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false) // каждое объявление должно иметь автора
     private UserEntity author;  // id автора объявления
 
