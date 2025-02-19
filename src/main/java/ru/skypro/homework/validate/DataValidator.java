@@ -8,9 +8,11 @@ import java.util.regex.Pattern;
 
 @Component
 public class DataValidator {
-    public void validateStringLengthRange(String input, int maxLength, int minLength) {
-        if (input.length() < minLength || input.length() > maxLength) {
-            throw new IllegalDataException("Длина строки должна быть от " + minLength + " до " + maxLength + " символов.");
+    public void validateStringLengthRange(int maxLength, int minLength, String... inputs) {
+        for (String input : inputs) {
+            if (input.length() < minLength || input.length() > maxLength) {
+                throw new IllegalDataException("Длина строки должна быть от " + minLength + " до " + maxLength + " символов.");
+            }
         }
     }
 
