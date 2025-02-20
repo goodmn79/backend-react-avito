@@ -2,6 +2,7 @@ package ru.skypro.homework.dto.user;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import ru.skypro.homework.enums.Role;
 
 @Data
 @Accessors(chain = true)
