@@ -2,11 +2,12 @@ package ru.skypro.homework.dto.user;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
+import ru.skypro.homework.enums.Role;
 
 @Data
 @Accessors(chain = true)
 public class User {
-    private long id;
+    private int id;
     private String email;
     private String firstName;
     private String lastName;
