@@ -3,38 +3,27 @@ package ru.skypro.homework.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.dto.ad.Ad;
-import ru.skypro.homework.validate.DataValidator;
+import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
+import ru.skypro.homework.component.Validatable;
 
 @Component
 @RequiredArgsConstructor
 public class AdMapper {
-    private final DataValidator validator;
+    private final Validatable validator;
 
     // Преобразование из AdEntity в Ad (DTO)
-    public Ad toAd(AdEntity adEntity) {
-        Ad ad = new Ad();
-        return ad.setPk(adEntity.getPk())
-                .setImage(adEntity.getImage())
+    public Ad map(AdEntity adEntity) {
+        return new Ad()
                 .setPrice(adEntity.getPrice())
                 .setTitle(adEntity.getTitle())
                 .setAuthor(adEntity.getAuthor());
     }
 
-    // Преобразование из Ad (DTO) в AdEntity
-    public AdEntity toAdEntity(Ad ad) {
-
-        validator.validateStringLengthRange(32, 4, ad.getTitle());
-        validator.validateStringLengthRange(64, 8, ad.getDescription());
-        validator.validatePrice(ad.getPrice());
-        validator.validatePhone(ad.getPhone());
-
+    // Преобразование из CreateOrUpdateAd (DTO) в AdEntity
+    public AdEntity map(CreateOrUpdateAd createOrUpdateAd) {
         return new AdEntity()
-                .setImage(ad.getImage())
-                .setPk(ad.getPk())
-                .setPrice(ad.getPrice())
-                .setTitle(ad.getTitle())
-                .setDescription(ad.getDescription())
-                .setAuthor(new UserEntity().setId(ad.getAuthor()));
+                .setPrice(validator.validate(createOrUpdateAd.getPrice()))
+                .setTitle(validator.validate(createOrUpdateAd.getTitle(), 4, 32).toLowerCase())
+                .setDescription(validator.validate(createOrUpdateAd.getDescription(), 8, 64).toLowerCase());
     }
-
 }
