@@ -1,4 +1,4 @@
-package ru.skypro.homework.dto.comment;
+package ru.skypro.homework.model;
 
 
 import lombok.Data;
@@ -11,7 +11,9 @@ import javax.persistence.*;
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long pk;
-    private long cratedAt;
+    private int pk;
+    private int cratedAt;
     private String text;
+    @ManyToOne
+    private UserEntity author;
 }
