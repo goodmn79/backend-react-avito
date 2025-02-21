@@ -14,8 +14,11 @@ public class AdMapper {
     // Преобразование из AdEntity в Ad (DTO)
     public Ad map(AdEntity adEntity) {
         return new Ad()
+                .setPk(adEntity.getPk())
+                .setImage(adEntity.getImage())
                 .setPrice(adEntity.getPrice())
                 .setTitle(adEntity.getTitle())
+                .setDescription(adEntity.getDescription())
                 .setAuthor(adEntity.getAuthor());
     }
 
@@ -23,7 +26,8 @@ public class AdMapper {
     public AdEntity map(CreateOrUpdateAd createOrUpdateAd) {
         return new AdEntity()
                 .setPrice(validator.validate(createOrUpdateAd.getPrice()))
-                .setTitle(validator.validate(createOrUpdateAd.getTitle(), 4, 32).toLowerCase())
-                .setDescription(validator.validate(createOrUpdateAd.getDescription(), 8, 64).toLowerCase());
+                .setTitle(validator.validate(createOrUpdateAd.getTitle(), 4, 32))
+                .setDescription(validator.validate(createOrUpdateAd.getDescription(), 8, 64));
     }
+
 }
