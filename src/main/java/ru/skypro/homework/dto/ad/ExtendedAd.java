@@ -10,18 +10,18 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ExtendedAd extends Ad {
 
-    @Schema(type = "string", description = "имя автора объявления")
+    @Schema(description = "имя автора объявления")
     private String authorFirstName;
 
-    @Schema(type = "string", description = "фамилия автора объявления")
+    @Schema(description = "фамилия автора объявления")
     private String authorLastName;
 
-    @Schema(type = "string", description = "описание объявления")
+    @Schema(description = "описание объявления")
     private String description;
 
-    @Schema(type = "string", description = "логин автора объявления")
+    @Schema(description = "логин автора объявления")
     private String email;
 
-    @Schema(type = "string", description = "телефон автора объявления")
+    @Schema(description = "телефон автора объявления")
     private String phone;
 }

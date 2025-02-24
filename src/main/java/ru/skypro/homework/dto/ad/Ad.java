@@ -8,18 +8,18 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Ad {
 
-    @Schema(type = "integer", format = "int32", description = "id автора объявления")
+    @Schema(description = "id автора объявления")
     private long author;
 
-    @Schema(type = "string", description = "ссылка на картинку объявления")
+    @Schema(description = "ссылка на картинку объявления")
     private String image;
 
-    @Schema(type = "integer", format = "int32", description = "id объявления")
+    @Schema(description = "id объявления")
     private long pk;
 
-    @Schema(type = "integer", format = "int32", description = "цена объявления")
+    @Schema(description = "цена объявления")
     private int price;
 
-    @Schema(type = "string", description = "заголовок объявления")
+    @Schema(description = "заголовок объявления")
     private String title;
 }

@@ -10,9 +10,9 @@ import java.util.List;
 @Accessors(chain = true)
 public class Ads {
 
-    @Schema(type = "integer", format = "int32", description = "общее количество объявлений")
+    @Schema(description = "общее количество объявлений")
     private int count;
 
-    @Schema(type = "array", implementation = Ad.class)
+    @Schema(description = "список объявлений")
     private List<Ad> result;
 }

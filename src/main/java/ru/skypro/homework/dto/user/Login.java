@@ -8,9 +8,9 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class Login {
 
-    @Schema(description = "логин", type = "string", minLength = 4, maxLength = 32)
+    @Schema(description = "логин", minLength = 4, maxLength = 32)
     private String username;
 
-    @Schema(type = "string", description = "пароль", minLength = 8, maxLength = 16)
+    @Schema(description = "пароль", minLength = 8, maxLength = 16)
     private String password;
 }

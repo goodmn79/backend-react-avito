@@ -8,24 +8,24 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class User {
 
-    @Schema(type = "integer", format = "int32", description = "id пользователя")
+    @Schema(description = "id пользователя")
     private long id;
 
-    @Schema(type = "string", description = "логин пользователя")
+    @Schema(description = "логин пользователя")
     private String email;
 
-    @Schema(type = "string", description = "имя пользователя")
+    @Schema(description = "имя пользователя")
     private String firstName;
 
-    @Schema(type = "string", description = "фамилия пользователя")
+    @Schema(description = "фамилия пользователя")
     private String lastName;
 
-    @Schema(type = "string", description = "телефон пользователя")
+    @Schema(description = "телефон пользователя")
     private String phone;
 
-    @Schema(type = "string", description = "роль пользователя", allowableValues = {"USER", "ADMIN"})
+    @Schema(description = "роль пользователя", allowableValues = {"USER", "ADMIN"})
     private Role role;
 
-    @Schema(type = "string", description = "ссылка на аватар пользователя")
+    @Schema(description = "ссылка на аватар пользователя")
     private String image;
 }
