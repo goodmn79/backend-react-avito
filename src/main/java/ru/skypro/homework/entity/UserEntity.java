@@ -1,4 +1,4 @@
-package ru.skypro.homework.model;
+package ru.skypro.homework.entity;
 
 import lombok.Data;
 import lombok.ToString;
@@ -6,6 +6,7 @@ import lombok.experimental.Accessors;
 import ru.skypro.homework.enums.Role;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -20,11 +21,17 @@ public class UserEntity {
     private String email;
     private String firstName;
     private String lastName;
-    private String phone; //\+7\s?\(?\d{3}\)?\s?\d{3}-?\d{2}-?\d{2}
+    private String phone;
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Image image;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AdEntity> ads;
+
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentEntity> comments;
 }

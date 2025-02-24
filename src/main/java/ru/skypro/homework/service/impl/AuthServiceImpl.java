@@ -9,7 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.user.Register;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 

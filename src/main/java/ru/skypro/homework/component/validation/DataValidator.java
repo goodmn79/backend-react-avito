@@ -1,4 +1,4 @@
-package ru.skypro.homework.component;
+package ru.skypro.homework.component.validation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.WrongFileFormatException;
-import ru.skypro.homework.model.Image;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.entity.Image;
+import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.repository.ImageRepository;
 
 import java.io.IOException;

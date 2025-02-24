@@ -8,9 +8,9 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class ExtendedAd extends Ad {
+    private String description;
     private String authorFirstName;
     private String authorLastName;
-    private String description;
     private String email;
     private String phone;
 }

@@ -10,16 +10,16 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.component.Validatable;
+import ru.skypro.homework.component.validation.Validatable;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.exception.WrongCurrentPasswordException;
-import ru.skypro.homework.mapper.UserMapper;
-import ru.skypro.homework.model.Image;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.component.mapper.UserMapper;
+import ru.skypro.homework.entity.Image;
+import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.repository.UserRepository;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +56,7 @@ public class UserService {
 
     public User getUser() {
         log.warn("Получение данных авторизованного пользователя.");
-        User user = userMapper.map(getCurrentUser());
+        User user = userMapper.map(this.getCurrentUser());
         log.info("Данные авторизованного пользователя успешно получены.");
         return user;
     }
@@ -110,7 +110,7 @@ public class UserService {
         return isExists;
     }
 
-    private UserEntity getCurrentUser() {
+    public UserEntity getCurrentUser() {
         return userRepository.findByUsername(this.currentUserName())
                 .orElseThrow(UserNotFoundException::new);
     }

@@ -1,4 +1,4 @@
-package ru.skypro.homework.model;
+package ru.skypro.homework.entity;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -22,4 +22,8 @@ public class Image {
     @OneToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
+
+    @OneToOne
+    @JoinColumn(name = "ad_pk")
+    private AdEntity ad;
 }

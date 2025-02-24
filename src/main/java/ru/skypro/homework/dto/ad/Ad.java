@@ -6,9 +6,9 @@ import lombok.experimental.Accessors;
 @Data
 @Accessors(chain = true)
 public class Ad {
-    private int author;
-    private String image;
     private int pk;
-    private int price;
     private String title;
+    private String image;
+    private int price;
+    private int author;
 }

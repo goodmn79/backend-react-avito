@@ -1,12 +1,12 @@
-package ru.skypro.homework.mapper;
+package ru.skypro.homework.component.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import ru.skypro.homework.component.Validatable;
+import ru.skypro.homework.component.validation.Validatable;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.dto.user.User;
-import ru.skypro.homework.model.UserEntity;
+import ru.skypro.homework.entity.UserEntity;
 
 @Component
 @RequiredArgsConstructor
