@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.exception.WrongFileFormatException;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
@@ -63,5 +64,36 @@ public class ImageService {
             throw new WrongFileFormatException();
         }
         return extension.toLowerCase();
+    }
+
+    // логика для сохранения изображения объявления
+    @Transactional
+    public Image saveAdImage(MultipartFile file, AdEntity ad) throws IOException {
+        byte[] imageData = file.getBytes();
+
+        Image image = new Image();
+        image.setPath(this.buildAdImageFileName(file, ad))
+                .setSize(file.getSize())
+                .setMediaType(file.getContentType())
+                .setData(imageData)
+                .setAd(ad);
+        this.saveToDirByAd(image);
+        return imageRepository.save(image);
+    }
+
+    private void saveToDirByAd(Image image) throws IOException {
+        String path = imageDir + image.getPath();
+        Path imagePath = Path.of(path);
+        Files.write(imagePath, image.getData());
+        log.debug("Изображение сохранено в: '{}'", path);
+    }
+
+    private String buildAdImageFileName(MultipartFile file, AdEntity ad) {
+        String fileName = file.getOriginalFilename();
+        if (fileName == null) {
+            throw new WrongFileFormatException();
+        }
+        String extension = getExtension(fileName);
+        return ad.getTitle() + "_" + ad.getPk() + extension;
     }
 }
