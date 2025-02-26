@@ -28,18 +28,18 @@ public class UserMapper {
     public UserEntity map(Register register) {
         return new UserEntity()
                 .setUsername(
-                        validator.validate(register.getUsername(), 4, 32)
+                        validator.validatedData(register.getUsername(), 4, 32)
                                 .toLowerCase())
                 .setPassword(
                         encoder.encode(
-                                validator.validate(register.getPassword(), 8, 16)
+                                validator.validatedData(register.getPassword(), 8, 16)
                         ))
                 .setFirstName(
-                        validator.validate(register.getFirstName(), 2, 16))
+                        validator.validatedData(register.getFirstName(), 2, 16))
                 .setLastName(
-                        validator.validate(register.getLastName(), 2, 16))
+                        validator.validatedData(register.getLastName(), 2, 16))
                 .setPhone(
-                        validator.validate(register.getPhone()))
+                        validator.validatedData(register.getPhone()))
                 .setRole(register.getRole());
     }
 
