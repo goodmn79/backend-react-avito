@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.component.validation.Validatable;
 import ru.skypro.homework.dto.ad.Ad;
+import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
@@ -20,14 +21,19 @@ public class AdMapper {
 
     public AdEntity map(CreateOrUpdateAd createOrUpdateAd) {
         return new AdEntity()
-                .setPrice(validator.validate(createOrUpdateAd.getPrice()))
-                .setTitle(validator.validate(createOrUpdateAd.getTitle(), 4, 32))
-                .setDescription(validator.validate(createOrUpdateAd.getDescription(), 8, 64))
+                .setPrice(validator.validatedData(createOrUpdateAd.getPrice()))
+                .setTitle(validator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
+                .setDescription(validator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
                 .setAuthor(userService.getCurrentUser());
     }
 
     public Ad map(AdEntity adEntity) {
-        return new Ad()
+        return new ExtendedAd()
+                .setDescription(adEntity.getDescription())
+                .setAuthorFirstName(adEntity.getAuthor().getFirstName())
+                .setAuthorLastName(adEntity.getAuthor().getLastName())
+                .setEmail(adEntity.getAuthor().getEmail())
+                .setPhone(adEntity.getAuthor().getPhone())
                 .setPk(adEntity.getPk())
                 .setImage(adEntity.getImage().getPath())
                 .setPrice(adEntity.getPrice())
@@ -35,25 +41,12 @@ public class AdMapper {
                 .setAuthor(adEntity.getAuthor().getId());
     }
 
-    public ExtendedAd mapExtendedAd (AdEntity adEntity) {
-        ExtendedAd extendedAd = new ExtendedAd();
-        extendedAd.setDescription(adEntity.getDescription());
-        extendedAd.setAuthorFirstName(adEntity.getAuthor().getFirstName());
-        extendedAd.setAuthorLastName(adEntity.getAuthor().getLastName());
-        extendedAd.setEmail(adEntity.getAuthor().getEmail());
-        extendedAd.setPhone(adEntity.getAuthor().getPhone());
-        extendedAd.setPk(adEntity.getPk());
-        extendedAd.setImage(adEntity.getImage().getPath());
-        extendedAd.setPrice(adEntity.getPrice());
-        extendedAd.setTitle(adEntity.getTitle());
-        extendedAd.setAuthor(adEntity.getAuthor().getId());
-        return extendedAd;
-    }
-
-    public List<Ad> map(List<AdEntity> adEntities) {
-        return adEntities
-                .stream()
-                .map(this::map)
-                .collect(Collectors.toUnmodifiableList());
+    public Ads map(List<AdEntity> adEntities) {
+        return new Ads()
+                .setCount(adEntities.size())
+                .setResult(adEntities
+                        .stream()
+                        .map(this::map)
+                        .collect(Collectors.toUnmodifiableList()));
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
-import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.service.AdService;
 
 import java.io.IOException;
@@ -37,7 +36,7 @@ public class AdController {
 
     @Operation(summary = "Получение информации об объявлении")
     @GetMapping("/{id}")
-    public ExtendedAd getAds(@PathVariable("id") int id) {
+    public Ad getAds(@PathVariable("id") int id) {
         return adService.getAdById(id);
     }
 
@@ -57,7 +56,7 @@ public class AdController {
     @Operation(summary = "Получение объявлений авторизованного пользователя")
     @GetMapping("/me")
     public Ads getAdsMe() {
-        return adService.getAdsMe();
+        return adService.getAds();
     }
 
     @Operation(summary = "Обновление картинки объявления",

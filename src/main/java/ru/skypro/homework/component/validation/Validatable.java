@@ -1,9 +1,9 @@
 package ru.skypro.homework.component.validation;
 
 public interface Validatable {
-    String validate(String input, int minLength, int maxLength);
+    String validatedData(String input, int minLength, int maxLength);
 
-    String validate(String input);
+    String validatedData(String input);
 
-    int validate(int price);
+    int validatedData(int price);
 }

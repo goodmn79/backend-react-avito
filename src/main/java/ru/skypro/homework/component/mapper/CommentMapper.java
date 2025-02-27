@@ -28,6 +28,6 @@ public class CommentMapper {
         return new CommentEntity()
                 .setAuthor(userService.getCurrentUser())
                 .setCratedAt(System.currentTimeMillis())
-                .setText(validator.validate(comment.getText(), 8, 64));
+                .setText(validator.validatedData(comment.getText(), 8, 64));
     }
 }
