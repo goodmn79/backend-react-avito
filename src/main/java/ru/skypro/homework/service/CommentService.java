@@ -9,13 +9,8 @@ import ru.skypro.homework.component.mapper.CommentMapper;
 import ru.skypro.homework.dto.comment.Comment;
 import ru.skypro.homework.dto.comment.Comments;
 import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
-import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.CommentEntity;
-import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.exception.CommentNotFoundException;
-import ru.skypro.homework.exception.NoAccessRightException;
-import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.repository.CommentRepository;
 
 import java.util.List;
@@ -25,7 +20,7 @@ import java.util.List;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
-    private final AdRepository adRepository;
+    private final AdService adService;
     private final UserService userService;
 
 
@@ -33,51 +28,57 @@ public class CommentService {
 
 
     public Comments getComments(int id) {
+        log.info("Получение всех комментариев.");
+
         List<CommentEntity> comments = commentRepository.findAllByAdPk(id);
+        log.info("Комментарии успешно получены.");
+
         return commentMapper.map(comments);
     }
 
 
     public Comment addComment(int id, CreateOrUpdateComment comment) {
+        log.info("Создание комментария.");
+
         CommentEntity entity =
-                commentMapper.map(comment)
-                        .setAd(adRepository.findById(id).get());
+                commentMapper.map(comment).setAd(adService.getAdEntity(id));
+
+        log.info("Комментарий успешно создан.");
         return commentMapper
                 .map(commentRepository
                         .save(entity));
     }
 
-    @PreAuthorize("@commentService.isUser(#adId)")
+    @PreAuthorize("@commentService.isCommentAuthor(#adId)")
     public Comment updateComment(int adId, int commentId, CreateOrUpdateComment comment) {
-        CommentEntity entity = preAuthorize(commentId);
-        return commentMapper
-                .map(commentRepository
-                        .save(entity.setText(comment.getText())));
+        log.info("Запрос на обновление комментария.");
+
+        CommentEntity entity = getCommentEntity(commentId);
+        entity.setText(comment.getText());
+
+        CommentEntity updatedEntity = commentRepository.save(entity);
+
+        log.info("Комментарий успешно обновлен.");
+        return commentMapper.map(updatedEntity);
     }
 
-    @PreAuthorize("@commentService.isUser(#adId)")
+    @PreAuthorize("hasRole('ADMIN') or @commentService.isCommentAuthor(#adId) or @adService.isAdAuthor(adId)")
     public void deleteComment(int adId, int commentId) {
+        log.warn("Удаление комментария.");
+
         commentRepository.deleteById(commentId);
+
+        log.info("Комментарий успешно удален.");
     }
 
     private CommentEntity getCommentEntity(int id) {
+        log.error("Данный комментарий не найден!");
         return commentRepository.findById(id).orElseThrow(CommentNotFoundException::new);
     }
 
-    private CommentEntity preAuthorize(int commentId) {
-
-        CommentEntity entity = this.getCommentEntity(commentId);
-        UserEntity author = entity.getAuthor();
-        if (author.equals(userService.getCurrentUser())) {
-            return entity;
-        }
-        throw new NoAccessRightException();
-    }
-
-    public boolean isUser(int adId) {
-        AdEntity ad = adRepository.findById(adId).get();
-        UserEntity author = ad.getAuthor();
-        UserEntity user = userService.getCurrentUser();
-        return author.equals(user) || user.getRole().equals(Role.ADMIN);
+    public boolean isCommentAuthor(int commentId) {
+        int commentAuthorId = this.getCommentEntity(commentId).getAuthor().getId();
+        int currentUserId = userService.getCurrentUser().getId();
+        return commentAuthorId == currentUserId;
     }
 }

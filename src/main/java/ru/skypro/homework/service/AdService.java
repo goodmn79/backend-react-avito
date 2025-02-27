@@ -66,7 +66,7 @@ public class AdService {
         return adMapper.map(adEntity);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
+    @PreAuthorize("hasRole('ADMIN') or @adService.isAdAuthor(#pk)")
     public void removeAdById(int pk) {
         log.warn("Удаление объявления.");
 
@@ -76,7 +76,7 @@ public class AdService {
         log.info("Объявление успешно удалено");
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
+    @PreAuthorize("@adService.isAdAuthor(#pk)")
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
         log.info("Запрос на обновление объявления.");
         AdEntity adEntity = this.getAdEntity(pk)
@@ -94,7 +94,7 @@ public class AdService {
         return adMapper.map(updatedEntity);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
+    @PreAuthorize("@adService.isAdAuthor(#pk)")
     public byte[] updateImage(int pk, MultipartFile image) throws IOException {
         log.info("Изменение изображения объявления.");
         AdEntity entity = this.getAdEntity(pk);
@@ -128,5 +128,11 @@ public class AdService {
                             log.error("Объявление не найдено!");
                             return new AdNotFoundException();
                         });
+    }
+
+    public boolean isAdAuthor(int adId) {
+        int authorId = getAdById(adId).getAuthor();
+        int currentUserId = userService.getCurrentUser().getId();
+        return authorId == currentUserId;
     }
 }
