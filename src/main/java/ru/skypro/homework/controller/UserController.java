@@ -1,5 +1,8 @@
 package ru.skypro.homework.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,9 +18,11 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Tag(name = "Пользователи")
 public class UserController {
     private final UserService userService;
 
+    @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
     public void setPassword(@RequestBody NewPassword newPassword,
                             HttpServletResponse response,
@@ -25,20 +30,24 @@ public class UserController {
         userService.updatePassword(newPassword, response, request);
     }
 
+    @Operation(summary = "Получение информации об авторизованном пользователе")
     @GetMapping("/me")
     public User getUser() {
         return userService.getUser();
     }
 
+    @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
         return userService.updateUser(updateUser);
     }
 
+    @Operation(summary = "Обновление аватара авторизованного пользователя",
+            requestBody = @io.swagger.v3.oas.annotations.parameters
+                    .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
     public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
         userService.updateUserImage(image);
     }
-
 }
 

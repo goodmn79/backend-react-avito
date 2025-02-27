@@ -6,6 +6,7 @@ target/
 /src/main/resources/application-dev.properties/mvnw
 
 /src/main/resources/application-dev.properties
+.env
 
 
 ### STS ###
