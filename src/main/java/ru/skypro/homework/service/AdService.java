@@ -10,6 +10,7 @@ import ru.skypro.homework.component.validation.Validatable;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
+import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
@@ -52,7 +53,7 @@ public class AdService {
         return adMapper.map(ad);
     }
 
-    public Ad getAdById(int pk) {
+    public ExtendedAd getAdById(int pk) {
         log.info("Запрос на получение полного описания объявления.");
 
         AdEntity adEntity = this.getAdEntity(pk);

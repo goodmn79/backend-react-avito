@@ -3,7 +3,6 @@ package ru.skypro.homework.component.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.component.validation.Validatable;
-import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
@@ -27,18 +26,18 @@ public class AdMapper {
                 .setAuthor(userService.getCurrentUser());
     }
 
-    public Ad map(AdEntity adEntity) {
+    public ExtendedAd map(AdEntity adEntity) {
         return new ExtendedAd()
-                .setDescription(adEntity.getDescription())
-                .setAuthorFirstName(adEntity.getAuthor().getFirstName())
-                .setAuthorLastName(adEntity.getAuthor().getLastName())
-                .setEmail(adEntity.getAuthor().getEmail())
-                .setPhone(adEntity.getAuthor().getPhone())
                 .setPk(adEntity.getPk())
                 .setImage(adEntity.getImage().getPath())
                 .setPrice(adEntity.getPrice())
                 .setTitle(adEntity.getTitle())
-                .setAuthor(adEntity.getAuthor().getId());
+                .setAuthor(adEntity.getAuthor().getId())
+                .setDescription(adEntity.getDescription())
+                .setAuthorFirstName(adEntity.getAuthor().getFirstName())
+                .setAuthorLastName(adEntity.getAuthor().getLastName())
+                .setEmail(adEntity.getAuthor().getEmail())
+                .setPhone(adEntity.getAuthor().getPhone());
     }
 
     public Ads map(List<AdEntity> adEntities) {
