@@ -24,4 +24,29 @@ public class ExtendedAd extends Ad {
 
     @Schema(description = "телефон автора объявления")
     private String phone;
+
+    public ExtendedAd setPk(int pk) {
+        super.setPk(pk);
+        return this;
+    }
+
+    public ExtendedAd setImage(String image) {
+        super.setImage(image);
+        return this;
+    }
+
+    public ExtendedAd setPrice(int price) {
+        super.setPrice(price);
+        return this;
+    }
+
+    public ExtendedAd setTitle(String title) {
+        super.setTitle(title);
+        return this;
+    }
+
+    public ExtendedAd setAuthor(int id) {
+        super.setAuthor(id);
+        return this;
+    }
 }
