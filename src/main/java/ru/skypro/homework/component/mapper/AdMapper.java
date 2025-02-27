@@ -3,6 +3,7 @@ package ru.skypro.homework.component.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.component.validation.Validatable;
+import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
@@ -45,7 +46,12 @@ public class AdMapper {
                 .setCount(adEntities.size())
                 .setResult(adEntities
                         .stream()
-                        .map(this::map)
+                        .map(a-> new Ad()
+                               .setPk(a.getPk())
+                               .setTitle(a.getTitle())
+                               .setPrice(a.getPrice())
+                               .setAuthor(a.getAuthor().getId())
+                               .setImage(a.getImage().getPath()))
                         .collect(Collectors.toUnmodifiableList()));
     }
 }
