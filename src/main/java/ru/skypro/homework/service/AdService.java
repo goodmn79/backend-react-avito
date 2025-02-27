@@ -3,6 +3,7 @@ package ru.skypro.homework.service;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.mapper.AdMapper;
@@ -40,10 +41,13 @@ public class AdService {
         return adMapper.map(ads);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Ad addAd(MultipartFile image, CreateOrUpdateAd createOrUpdateAd) throws IOException {
         log.info("Создание объявления.");
-
         AdEntity entity = adMapper.map(createOrUpdateAd);
+        //?????
+        entity.setAuthor(userService.getCurrentUser());
+
         Image savedImage = imageService.saveImage(image, entity.getPk());
 
         log.debug("Сохранение объявления в базе данных.");
@@ -62,6 +66,7 @@ public class AdService {
         return adMapper.map(adEntity);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
     public void removeAdById(int pk) {
         log.warn("Удаление объявления.");
 
@@ -71,6 +76,7 @@ public class AdService {
         log.info("Объявление успешно удалено");
     }
 
+    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
         log.info("Запрос на обновление объявления.");
         AdEntity adEntity = this.getAdEntity(pk)
@@ -88,7 +94,7 @@ public class AdService {
         return adMapper.map(updatedEntity);
     }
 
-
+    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
     public byte[] updateImage(int pk, MultipartFile image) throws IOException {
         log.info("Изменение изображения объявления.");
         AdEntity entity = this.getAdEntity(pk);
@@ -103,6 +109,7 @@ public class AdService {
         return adImage.getData();
     }
 
+    @PreAuthorize("isAuthenticated()")
     public Ads getAds() {
         log.info("Запрос на получение объявлений авторизованного пользователя.");
         UserEntity currentUser = userService.getCurrentUser();
@@ -114,7 +121,7 @@ public class AdService {
         return adsMe;
     }
 
-    private AdEntity getAdEntity(int pk) {
+    public AdEntity getAdEntity(int pk) {
         return
                 adRepository.findById(pk)
                         .orElseThrow(() -> {

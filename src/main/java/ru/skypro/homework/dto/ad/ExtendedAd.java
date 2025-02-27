@@ -25,26 +25,31 @@ public class ExtendedAd extends Ad {
     @Schema(description = "телефон автора объявления")
     private String phone;
 
+    @Override
     public ExtendedAd setPk(int pk) {
         super.setPk(pk);
         return this;
     }
 
+    @Override
     public ExtendedAd setImage(String image) {
         super.setImage(image);
         return this;
     }
 
+    @Override
     public ExtendedAd setPrice(int price) {
         super.setPrice(price);
         return this;
     }
 
+    @Override
     public ExtendedAd setTitle(String title) {
         super.setTitle(title);
         return this;
     }
 
+    @Override
     public ExtendedAd setAuthor(int id) {
         super.setAuthor(id);
         return this;
