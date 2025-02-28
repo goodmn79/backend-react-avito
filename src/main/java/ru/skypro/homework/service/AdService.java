@@ -66,7 +66,7 @@ public class AdService {
         return adMapper.map(adEntity);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @adService.isAdAuthor(#pk)")
+    @PreAuthorize("hasAuthority('ADMIN') or @adService.isAdAuthor(#pk)")
     public void removeAdById(int pk) {
         log.warn("Удаление объявления.");
 
