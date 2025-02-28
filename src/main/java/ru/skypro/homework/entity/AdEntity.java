@@ -19,8 +19,8 @@ public class AdEntity {
     private String title;
     private String description;
 
-    @OneToOne(mappedBy = "ad", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
+    @OneToOne
+    @JoinColumn(name = "image_id")
     private Image image;
 
     @ManyToOne(fetch = FetchType.LAZY)

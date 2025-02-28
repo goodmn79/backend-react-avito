@@ -18,12 +18,4 @@ public class Image {
     private String mediaType;
     @Transient
     private byte[] data;
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
-
-    @OneToOne
-    @JoinColumn(name = "ad_pk")
-    private AdEntity ad;
 }
