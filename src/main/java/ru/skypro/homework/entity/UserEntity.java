@@ -1,7 +1,6 @@
 package ru.skypro.homework.entity;
 
 import lombok.Data;
-import lombok.ToString;
 import lombok.experimental.Accessors;
 import ru.skypro.homework.enums.Role;
 
@@ -25,8 +24,8 @@ public class UserEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
+    @OneToOne
+    @JoinColumn(name = "image_id")
     private Image image;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -43,11 +43,11 @@ public class UserService {
     public void updatePassword(NewPassword newPassword, HttpServletResponse response, HttpServletRequest request) {
         log.warn("Изменение пароля авторизованного пользователя.");
         String currentPassword =
-                validator.validate(newPassword.getCurrentPassword(), 8, 16);
+                validator.validatedData(newPassword.getCurrentPassword(), 8, 16);
         this.checkCurrentPassword(currentPassword);
         String updatedPassword =
                 encoder.encode(
-                        validator.validate(newPassword.getNewPassword(), 8, 16)
+                        validator.validatedData(newPassword.getNewPassword(), 8, 16)
                 );
         userRepository.save(getCurrentUser().setPassword(updatedPassword));
         this.clearSecurityContext(response, request);
@@ -66,14 +66,11 @@ public class UserService {
         UserEntity user =
                 this.getCurrentUser()
                         .setFirstName(
-                                validator.validate(updateUser.getFirstName(), 2, 16)
-                        )
+                                validator.validatedData(updateUser.getFirstName(), 2, 16))
                         .setLastName(
-                                validator.validate(updateUser.getLastName(), 2, 16)
-                        )
+                                validator.validatedData(updateUser.getLastName(), 2, 16))
                         .setPhone(
-                                validator.validate(updateUser.getPhone())
-                        );
+                                validator.validatedData(updateUser.getPhone()));
         userRepository.save(user);
         log.info("Данные авторизованного пользователя успешно обновлены.");
         return updateUser;
@@ -90,7 +87,7 @@ public class UserService {
     public void updateUserImage(MultipartFile file) throws IOException {
         log.warn("Обновление аватара текущего пользователя.");
         UserEntity user = this.getCurrentUser();
-        Image userImage = imageService.saveImage(file, user);
+        Image userImage = imageService.saveImage(file, user.getId());
         userRepository.save(user.setImage(userImage));
     }
 
