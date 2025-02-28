@@ -76,7 +76,7 @@ public class AdService {
         log.info("Объявление успешно удалено");
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
+    @PreAuthorize("@userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
         log.info("Запрос на обновление объявления.");
         AdEntity adEntity = this.getAdEntity(pk)
@@ -94,7 +94,7 @@ public class AdService {
         return adMapper.map(updatedEntity);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
+    @PreAuthorize("@userService.currentUserName() == @adService.getAdEntity(#pk).author.username")
     public byte[] updateImage(int pk, MultipartFile image) throws IOException {
         log.info("Изменение изображения объявления.");
         AdEntity entity = this.getAdEntity(pk);
