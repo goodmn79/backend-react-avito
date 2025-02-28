@@ -62,7 +62,7 @@ public class CommentService {
         return commentMapper.map(updatedEntity);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @commentService.isCommentAuthor(#adId) or @adService.isAdAuthor(adId)")
+    @PreAuthorize("hasAuthority('ADMIN') or @commentService.isCommentAuthor(#adId) or @adService.isAdAuthor(adId)")
     public void deleteComment(int adId, int commentId) {
         log.warn("Удаление комментария.");
 
