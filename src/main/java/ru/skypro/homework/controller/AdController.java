@@ -29,10 +29,10 @@ public class AdController {
     }
 
     @Operation(summary = "Добавление объявления")
-    @PostMapping
-    public Ad addAd(@RequestPart("image") MultipartFile image,
-                    @RequestPart("properties") CreateOrUpdateAd createOrUpdateAd) throws IOException {
-        return adService.addAd(image, createOrUpdateAd);
+    @PostMapping(consumes = "multipart/form-data", produces = "application/json")
+    public Ad addAd(@RequestParam("properties") String jsonString,
+                    @RequestPart("image") MultipartFile image) throws IOException {
+        return adService.addAd(jsonString, image);
     }
 
     @Operation(summary = "Получение информации об объявлении")

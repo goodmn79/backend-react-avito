@@ -1,5 +1,6 @@
 package ru.skypro.homework.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ public class AdService {
     private final Validatable validator;
     private final ImageService imageService;
     private final UserService userService;
+    private final ObjectMapper objectMapper;
 
     private final Logger log = LoggerFactory.getLogger(AdService.class);
 
@@ -42,8 +44,9 @@ public class AdService {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public Ad addAd(MultipartFile image, CreateOrUpdateAd createOrUpdateAd) throws IOException {
+    public Ad addAd(String jsonString, MultipartFile image) throws IOException {
         log.info("Создание объявления.");
+        CreateOrUpdateAd createOrUpdateAd = objectMapper.readValue(jsonString, CreateOrUpdateAd.class);
         AdEntity entity = adMapper.map(createOrUpdateAd);
 
         entity.setAuthor(userService.getCurrentUser());

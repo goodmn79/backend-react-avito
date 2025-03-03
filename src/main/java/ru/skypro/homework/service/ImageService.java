@@ -24,12 +24,15 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
 
+    private final DataValidator dataValidator;
+
     private final Logger log = LoggerFactory.getLogger(ImageService.class);
 
     @Transactional
     public Image saveImage(MultipartFile file, int id) throws IOException {
+        log.info("Сохранение фото.");
         Image image = imageRepository.findById(id).orElse(new Image());
-        image.setPath(this.buildFileName(file, id))
+        image.setPath(this.buildFileName(file))
                 .setSize(file.getSize())
                 .setMediaType(file.getContentType())
                 .setData(file.getBytes());
@@ -44,8 +47,8 @@ public class ImageService {
         log.debug("Изображение сохранено в: '{}'", path);
     }
 
-    public String buildFileName(MultipartFile file, int id) {
-        String fileName = DataValidator.validatedData(file);
-        return id + ImageExtension.getExtension(fileName);
+    public String buildFileName(MultipartFile file) {
+        String fileName = dataValidator.validatedData(file);
+        return System.currentTimeMillis() + ImageExtension.getExtension(fileName);
     }
 }

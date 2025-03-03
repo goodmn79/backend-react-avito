@@ -89,6 +89,7 @@ public class UserService {
         UserEntity user = this.getCurrentUser();
         Image userImage = imageService.saveImage(file, user.getId());
         userRepository.save(user.setImage(userImage));
+        log.info("Аватар успешно обновлён.");
     }
 
     public UserEntity getUserByUsername(String username) {

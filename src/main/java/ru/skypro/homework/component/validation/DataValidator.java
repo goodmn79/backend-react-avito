@@ -14,9 +14,10 @@ import java.util.regex.Pattern;
 public class DataValidator implements Validatable {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public static String validatedData(MultipartFile file) {
+    public String validatedData(MultipartFile file) {
         String fileName = file.getOriginalFilename();
         if (fileName == null) {
+            log.error("Неверный формат аватара.");
             throw new WrongFileFormatException();
         }
         return fileName;
