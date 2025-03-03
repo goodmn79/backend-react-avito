@@ -1,7 +1,5 @@
 package ru.skypro.homework.enums;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.skypro.homework.exception.WrongFileFormatException;
 
 public enum ImageExtension {
@@ -9,7 +7,6 @@ public enum ImageExtension {
     JPEG(".jpeg"),
     PNG(".png");
 
-    private static final Logger log = LoggerFactory.getLogger(ImageExtension.class);
     private final String extension;
 
     ImageExtension(String extension) {
