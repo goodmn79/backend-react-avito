@@ -82,15 +82,6 @@ public class UserService {
         log.info("Аватар успешно обновлён.");
     }
 
-    public UserEntity getUserByUsername(String username) {
-        log.warn("Поиск пользователя по логину...");
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> {
-                    log.error("Пользователь не найден!");
-                    return new UserNotFoundException();
-                });
-    }
-
     public boolean userExists(String username) {
         boolean isExists = userRepository.existsByUsername(username);
         log.debug("Проверка существования текущего пользоввателя, результат: '{}'", isExists);
