@@ -23,11 +23,11 @@ public class AdEntity {
     @JoinColumn(name = "image_id")
     private Image image;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
 
-    @OneToMany(mappedBy = "ad")
+    @OneToMany(mappedBy = "ad", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<CommentEntity> comments;
 }

@@ -17,7 +17,6 @@ import ru.skypro.homework.service.AuthService;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
 
     @Operation(tags = {"Авторизация"},
@@ -35,6 +34,7 @@ public class AuthController {
             summary = "Регистрация пользователя")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
+
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {

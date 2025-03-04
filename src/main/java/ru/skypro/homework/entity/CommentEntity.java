@@ -16,11 +16,11 @@ public class CommentEntity {
     private long cratedAt;
     private String text;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "ad_pk", nullable = false)
     private AdEntity ad;
 }

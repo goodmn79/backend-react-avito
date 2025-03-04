@@ -2,6 +2,7 @@ package ru.skypro.homework.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,10 +31,15 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(
                         authorization ->
                                 authorization
-                                        .mvcMatchers(AUTH_WHITELIST)
-                                        .permitAll()
-                                        .mvcMatchers("/ads/**", "/users/**")
-                                        .authenticated())
+                                        .mvcMatchers(AUTH_WHITELIST).permitAll()
+                                        .mvcMatchers(HttpMethod.GET, "/ads", "/comments").permitAll()
+                                        .mvcMatchers("/users/**").authenticated()
+                                        .mvcMatchers(HttpMethod.POST, "/ads", "/comments")
+                                        .authenticated()
+                                        .mvcMatchers(HttpMethod.PATCH, "/ads/**", "/comments/**")
+                                        .authenticated()
+                                        .mvcMatchers(HttpMethod.GET,"/ads/{id}", "/ads/me")
+                                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN"))
                 .cors()
                 .and()
                 .httpBasic(withDefaults());

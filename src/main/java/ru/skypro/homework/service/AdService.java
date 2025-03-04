@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.mapper.AdMapper;
-import ru.skypro.homework.component.validation.Validatable;
+import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
@@ -27,7 +27,6 @@ import java.util.List;
 public class AdService {
     private final AdRepository adRepository;
     private final AdMapper adMapper;
-    private final Validatable validator;
     private final ImageService imageService;
     private final UserService userService;
     private final ObjectMapper objectMapper;
@@ -43,7 +42,7 @@ public class AdService {
         return adMapper.map(ads);
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @Transactional
     public Ad addAd(String jsonString, MultipartFile image) throws IOException {
         log.info("Создание объявления.");
         CreateOrUpdateAd createOrUpdateAd = objectMapper.readValue(jsonString, CreateOrUpdateAd.class);
@@ -69,26 +68,27 @@ public class AdService {
         return adMapper.map(adEntity);
     }
 
-    @PreAuthorize("hasAuthority('ADMIN') or @adService.isAdAuthor(#pk)")
+    @Transactional
     public void removeAdById(int pk) {
         log.warn("Удаление объявления.");
 
         AdEntity entity = this.getAdEntity(pk);
+        int imageId = entity.getImage().getId();
 
+        imageService.removeImage(imageId);
         adRepository.deleteById(entity.getPk());
         log.info("Объявление успешно удалено");
     }
 
-    @PreAuthorize("@adService.isAdAuthor(#pk)")
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
         log.info("Запрос на обновление объявления.");
         AdEntity adEntity = this.getAdEntity(pk)
                 .setTitle(
-                        validator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
+                        DataValidator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
                 .setDescription(
-                        validator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
+                        DataValidator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
                 .setPrice(
-                        validator.validatedData(createOrUpdateAd.getPrice()));
+                        DataValidator.validatedPrice(createOrUpdateAd.getPrice()));
 
         log.debug("Сохранение изменений объявления в базе данных.");
         AdEntity updatedEntity = adRepository.save(adEntity);
@@ -97,22 +97,20 @@ public class AdService {
         return adMapper.map(updatedEntity);
     }
 
-    @PreAuthorize("@adService.isAdAuthor(#pk)")
+    @Transactional
     public byte[] updateImage(int pk, MultipartFile image) throws IOException {
         log.info("Изменение изображения объявления.");
-        AdEntity entity = this.getAdEntity(pk);
 
-        Image adImage = imageService.saveImage(image, entity.getPk());
-        entity.setImage(adImage);
+        Image adImage = imageService.saveImage(image, pk);
 
         log.debug("Сохранение нового изображения объявления в базе данных.");
-        adRepository.save(entity);
+        adRepository.save(this.getAdEntity(pk))
+                .setImage(adImage);
 
         log.info("Изображение для объявления успешно обновлено.");
         return adImage.getData();
     }
 
-    @PreAuthorize("isAuthenticated()")
     public Ads getAds() {
         log.info("Запрос на получение объявлений авторизованного пользователя.");
         UserEntity currentUser = userService.getCurrentUser();
@@ -133,9 +131,8 @@ public class AdService {
                         });
     }
 
-    public boolean isAdAuthor(int pk) {
-        int adAuthorId = this.getAdEntity(pk).getAuthor().getId();
-        int currentUserId = userService.getCurrentUser().getId();
-        return adAuthorId == currentUserId;
+    public boolean isAdAuthor(int pk, String currentUsername) {
+        String adAuthorUsername = this.getAdEntity(pk).getAuthor().getUsername();
+        return adAuthorUsername.equals(currentUsername);
     }
 }

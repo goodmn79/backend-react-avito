@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
+import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,13 +22,15 @@ import java.io.IOException;
 @Tag(name = "Пользователи")
 public class UserController {
     private final UserService userService;
+    private final AuthService authService;
 
     @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
     public void setPassword(@RequestBody NewPassword newPassword,
                             HttpServletResponse response,
                             HttpServletRequest request) {
-        userService.updatePassword(newPassword, response, request);
+        userService.updatePassword(newPassword);
+        authService.clearSecurityContext(response, request);
     }
 
     @Operation(summary = "Получение информации об авторизованном пользователе")
@@ -49,5 +52,11 @@ public class UserController {
     public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
         userService.updateUserImage(image);
     }
+
+    @PostMapping("/logout")
+    public void logout(HttpServletResponse response, HttpServletRequest request) {
+        authService.clearSecurityContext(response, request);
+    }
+
 }
 

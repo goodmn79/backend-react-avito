@@ -3,15 +3,20 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -23,15 +28,15 @@ public class AuthServiceImpl implements AuthService {
     private final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Override
-    public boolean login(String userName, String password) {
+    public boolean login(String username, String password) {
         log.warn("Аутентификация пользователя...");
-        if (manager.userExists(userName)) {
-            UserDetails user = manager.loadUserByUsername(userName);
-            boolean matches = encoder.matches(password, user.getPassword());
-            log.info("Проверка аутентификации пользователя в текущей сессии, результат: '{}'", matches);
-            return matches;
+
+        if (manager.userExists(username)) {
+            log.info("Пользователь уже аутентифицирован.");
+            return true;
         }
-        UserEntity userEntity = userService.getUserByUsername(userName);
+
+        UserEntity userEntity = userService.getUserByUsername(username);
         log.info("Пользователь найден.");
         if (encoder.matches(password, userEntity.getPassword())) {
             manager.createUser(
@@ -59,4 +64,19 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
+    @Override
+    public void clearSecurityContext(HttpServletResponse response, HttpServletRequest request) {
+        log.warn("Завершение сеанса!");
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        manager.deleteUser(username);
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+        new SecurityContextLogoutHandler()
+                .logout(request, response, authentication);
+        SecurityContextHolder.clearContext();
+        request.getSession().invalidate();
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            log.info("Контекст безопасности очищен.");
+        }
+    }
 }

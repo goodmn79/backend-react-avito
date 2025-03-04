@@ -2,7 +2,7 @@ package ru.skypro.homework.component.mapper;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ru.skypro.homework.component.validation.Validatable;
+import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
@@ -17,13 +17,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdMapper {
     private final UserService userService;
-    private final Validatable validator;
 
     public AdEntity map(CreateOrUpdateAd createOrUpdateAd) {
         return new AdEntity()
-                .setPrice(validator.validatedData(createOrUpdateAd.getPrice()))
-                .setTitle(validator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
-                .setDescription(validator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
+                .setPrice(DataValidator.validatedPrice(createOrUpdateAd.getPrice()))
+                .setTitle(DataValidator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
+                .setDescription(DataValidator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
                 .setAuthor(userService.getCurrentUser());
     }
 
@@ -46,12 +45,12 @@ public class AdMapper {
                 .setCount(adEntities.size())
                 .setResult(adEntities
                         .stream()
-                        .map(a-> new Ad()
-                               .setPk(a.getPk())
-                               .setTitle(a.getTitle())
-                               .setPrice(a.getPrice())
-                               .setAuthor(a.getAuthor().getId())
-                               .setImage(a.getImage().getPath()))
+                        .map(a -> new Ad()
+                                .setPk(a.getPk())
+                                .setTitle(a.getTitle())
+                                .setPrice(a.getPrice())
+                                .setAuthor(a.getAuthor().getId())
+                                .setImage(a.getImage().getPath()))
                         .collect(Collectors.toUnmodifiableList()));
     }
 }
