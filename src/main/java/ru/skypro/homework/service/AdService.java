@@ -100,12 +100,11 @@ public class AdService {
     @Transactional
     public byte[] updateImage(int pk, MultipartFile image) throws IOException {
         log.info("Изменение изображения объявления.");
-        AdEntity entity = this.getAdEntity(pk);
 
-        Image adImage = imageService.updateAdImage(image, entity);
+        Image adImage = imageService.saveImage(image, pk);
 
         log.debug("Сохранение нового изображения объявления в базе данных.");
-        adRepository.save(entity)
+        adRepository.save(this.getAdEntity(pk))
                 .setImage(adImage);
 
         log.info("Изображение для объявления успешно обновлено.");
@@ -123,7 +122,7 @@ public class AdService {
         return adsMe;
     }
 
-    private AdEntity getAdEntity(int pk) {
+    public AdEntity getAdEntity(int pk) {
         return
                 adRepository.findById(pk)
                         .orElseThrow(() -> {

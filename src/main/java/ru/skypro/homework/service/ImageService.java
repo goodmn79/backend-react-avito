@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.validation.DataValidator;
-import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.enums.ImageExtension;
 import ru.skypro.homework.exception.ImageNotFoundException;
@@ -37,11 +36,6 @@ public class ImageService {
                 .setData(file.getBytes());
         this.saveToDir(image);
         return imageRepository.save(image);
-    }
-
-    public Image updateAdImage(MultipartFile file, AdEntity ad) throws IOException {
-        int imageId = ad.getImage().getId();
-        return this.saveImage(file, imageId);
     }
 
     public void removeImage(int imageId) {

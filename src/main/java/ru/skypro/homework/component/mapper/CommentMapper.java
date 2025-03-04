@@ -18,10 +18,11 @@ public class CommentMapper {
     private final UserService userService;
 
     public Comment map(CommentEntity commentEntity) {
+        String imagePath = commentEntity.getAuthor().getImage() == null ? null : commentEntity.getAuthor().getImage().getPath();
         return new Comment()
                 .setPk(commentEntity.getPk())
                 .setAuthor(commentEntity.getAuthor().getId())
-                .setAuthorImage(commentEntity.getAuthor().getImage().getPath())
+                .setAuthorImage(imagePath)
                 .setAuthorFirstName(commentEntity.getAuthor().getFirstName())
                 .setCreatedAt(commentEntity.getCratedAt())
                 .setText(commentEntity.getText());
