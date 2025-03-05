@@ -52,11 +52,5 @@ public class UserController {
     public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
         userService.updateUserImage(image);
     }
-
-    @PostMapping("/logout")
-    public void logout(HttpServletResponse response, HttpServletRequest request) {
-        authService.clearSecurityContext(response, request);
-    }
-
 }
 
