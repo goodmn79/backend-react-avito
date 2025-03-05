@@ -2,9 +2,13 @@ package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.SchemaProperty;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.ad.Ad;
@@ -30,6 +34,7 @@ public class AdController {
 
     @Operation(summary = "Добавление объявления")
     @PostMapping(consumes = "multipart/form-data", produces = "application/json")
+    @ResponseStatus(HttpStatus.CREATED)
     public Ad addAd(@RequestParam("properties") String jsonString,
                     @RequestPart("image") MultipartFile image) throws IOException {
         return adService.addAd(jsonString, image);
@@ -43,6 +48,7 @@ public class AdController {
 
     @Operation(summary = "Удаление объявления")
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeAd(@PathVariable("id") int id) {
         adService.removeAdById(id);
     }
@@ -61,7 +67,11 @@ public class AdController {
     }
 
     @Operation(summary = "Обновление картинки объявления",
-            responses = {@ApiResponse(description = "OK",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "multipart/form-data",
+                            schema = @Schema(type = "string", format = "binary"))
+            ), responses = {@ApiResponse(description = "OK",
                     content = @Content(mediaType = "application/octet-stream"))})
     @PatchMapping("/{id}/image")
     public byte[] updateImage(@PathVariable("id") int id,
