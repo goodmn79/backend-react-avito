@@ -10,6 +10,7 @@ import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.enums.ImageExtension;
 import ru.skypro.homework.exception.ImageNotFoundException;
+import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.repository.ImageRepository;
 
 import java.io.IOException;
@@ -26,14 +27,21 @@ public class ImageService {
 
     private final Logger log = LoggerFactory.getLogger(ImageService.class);
 
-    public Image saveImage(MultipartFile file, int id) throws IOException {
+    public Image saveImage(MultipartFile file, int id) {
         log.info("Сохранение фото.");
         Image image = imageRepository.findById(id).orElse(new Image());
         String path = image.getPath() == null ? this.buildFileName(file) : image.getPath();
-        image.setPath(path)
-                .setSize(file.getSize())
-                .setMediaType(file.getContentType())
-                .setData(file.getBytes());
+
+        try {
+            image.setPath(path)
+                    .setSize(file.getSize())
+                    .setMediaType(file.getContentType())
+                    .setData(file.getBytes());
+        }catch (IOException e) {
+            log.error(e.getMessage());
+            throw new UnsuccessfulImageSavingException();
+        }
+
         this.saveToDir(image);
         return imageRepository.save(image);
     }
@@ -51,10 +59,15 @@ public class ImageService {
         }
     }
 
-    private void saveToDir(Image image) throws IOException {
+    private void saveToDir(Image image) {
         String path = imageDir + image.getPath();
         Path imagePath = Path.of(path);
-        Files.write(imagePath, image.getData());
+        try {
+            Files.write(imagePath, image.getData());
+        }catch (IOException e) {
+            log.error(e.getMessage());
+            throw new UnsuccessfulImageSavingException();
+        }
         log.debug("Изображение сохранено в: '{}'", path);
     }
 

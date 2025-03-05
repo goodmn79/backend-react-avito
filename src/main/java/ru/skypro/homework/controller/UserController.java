@@ -14,7 +14,6 @@ import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/users")
@@ -49,7 +48,7 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
+    public void updateUserImage(@RequestParam("image") MultipartFile image) {
         userService.updateUserImage(image);
     }
 }
