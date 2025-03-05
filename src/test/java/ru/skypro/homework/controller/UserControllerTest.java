@@ -5,10 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
@@ -19,6 +22,7 @@ import ru.skypro.homework.service.UserService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -47,14 +51,16 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "testEmail@email.com", roles = "USER")
-    void setPassword() throws Exception {
+    void testSetPassword() throws Exception {
         NewPassword newPassword = new NewPassword();
         newPassword.setNewPassword("newPassword123");
 
-        mockMvc.perform(post("/users/set_password"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json("{\"newPassword\": \"newPassword123\"}"));
+
+        mockMvc.perform(post("/users/set_password")
+                        .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"newPassword\": \"newPassword123\"}"))
+                .andExpect(status().isOk());
 
         verify(userService, times(1)).updatePassword(any(NewPassword.class));
         verify(authService, times(1)).clearSecurityContext(any(), any());
@@ -62,7 +68,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "testEmail@email.com", roles = "USER")
-    void getUser() throws Exception {
+    void testGetUser() throws Exception {
         when(userService.getUser()).thenReturn(testUser);
 
         mockMvc.perform(get("/users/me"))
@@ -76,16 +82,16 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "testEmail@email.com", roles = "USER")
-    void updateUser() throws Exception {
+    void testUpdateUser() throws Exception {
         UpdateUser updateUser = new UpdateUser();
         updateUser.setFirstName("updatedFirstName");
         updateUser.setLastName("updatedLastName");
 
         when(userService.updateUser(any(UpdateUser.class))).thenReturn(updateUser);
 
-        mockMvc.perform(patch("/users/me"))
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json("{\"firstName\": \"UpdatedFirstName\", \"lastName\": \"UpdatedLastName\"}"))
+        mockMvc.perform(patch("/users/me").with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"firstName\": \"updatedFirstName\", \"lastName\": \"updatedLastName\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("updatedFirstName"))
                 .andExpect(jsonPath("$.lastName").value("updatedLastName"));
@@ -95,13 +101,19 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testEmail@email.com", roles = "ADMIN")
-    void updateUserImage() throws Exception {
-
-        mockMvc.perform(patch("/users/me/image")
-                        .param("image", "test.png"))
+    @WithMockUser(username = "testEmail@email.com", roles = "USER")
+    void testUpdateUserImage() throws Exception {
+        MockMultipartFile file = new MockMultipartFile(
+                "image",
+                "test.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "test content".getBytes()
+        );
+        mockMvc.perform(multipart(HttpMethod.PATCH,"/users/me/image")
+                        .file(file)
+                        .with(csrf()))
                 .andExpect(status().isOk());
 
-        verify(userService, times(1)).updateUserImage(any());
+        verify(userService, times(1)).updateUserImage(any(MultipartFile.class));
     }
 }
