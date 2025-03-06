@@ -24,6 +24,7 @@ import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.repository.UserRepository;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -213,7 +214,7 @@ class UserServiceTest {
         }
 
         @Test
-        void testUpdateUserImage_shouldSaveImage() {
+        void testUpdateUserImage_shouldSaveImage() throws IOException {
             MultipartFile file = mock(MultipartFile.class);
             Image image = mock(Image.class);
             when(userRepository.findByUsername(testEntity.getUsername())).thenReturn(Optional.of(testEntity));
@@ -238,7 +239,7 @@ class UserServiceTest {
         }
 
         @Test
-        void testUpdateUserImage_whenUnsuccessfulImageSaving_shouldThrowException() {
+        void testUpdateUserImage_whenUnsuccessfulImageSaving_shouldThrowException() throws IOException {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
             when(imageService.saveImage(any(MultipartFile.class), anyInt()))

@@ -15,6 +15,7 @@ import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Контроллер для работы с пользователями.
@@ -89,7 +90,7 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestParam("image") MultipartFile image) {
+    public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
         log.info("Вызван метод 'updateUserImage'");
         userService.updateUserImage(image);
     }

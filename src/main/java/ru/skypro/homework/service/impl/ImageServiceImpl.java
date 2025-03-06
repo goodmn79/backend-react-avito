@@ -12,6 +12,7 @@ import ru.skypro.homework.enums.ImageExtension;
 import ru.skypro.homework.exception.ImageNotFoundException;
 import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.repository.ImageRepository;
+import ru.skypro.homework.service.ImageService;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -38,7 +39,7 @@ public class ImageServiceImpl implements ImageService {
                     .setMediaType(file.getContentType())
                     .setData(file.getBytes());
         } catch (IOException e) {
-            log.error("{}. Ошибка сохраненния изображения!", e.getMessage());
+            log.error("{}. Ошибка сохранения изображения!", e.getMessage());
             throw new UnsuccessfulImageSavingException();
         }
 

@@ -9,6 +9,7 @@ import ru.skypro.homework.entity.UserEntity;
 
 import java.io.IOException;
 
+
 public interface UserService {
     void updatePassword(NewPassword newPassword);
 
