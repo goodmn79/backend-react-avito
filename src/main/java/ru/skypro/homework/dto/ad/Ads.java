@@ -6,6 +6,15 @@ import lombok.experimental.Accessors;
 
 import java.util.List;
 
+/**
+ * DTO класс для передачи данных объявлений.
+ * <p>
+ * Содержит информацию о количестве объявлений и их список.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Data
 @Accessors(chain = true)
 public class Ads {

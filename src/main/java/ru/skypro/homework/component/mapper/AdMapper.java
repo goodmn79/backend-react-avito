@@ -13,11 +13,24 @@ import ru.skypro.homework.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
+/**
+ * Маппер для преобразования данных объявлений между DTO и сущностями.
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Component
 @RequiredArgsConstructor
 public class AdMapper {
     private final UserService userService;
 
+    /**
+     * Преобразует {@link CreateOrUpdateAd} в {@link AdEntity}.
+     *
+     * @param createOrUpdateAd DTO с данными для создания и обновления объявления, которое нужно преобразовать
+     * @return {@link AdEntity}, сущность содержащую краткую информацию о товаре в объявлении
+     */
     public AdEntity map(CreateOrUpdateAd createOrUpdateAd) {
         return new AdEntity()
                 .setPrice(DataValidator.validatedPrice(createOrUpdateAd.getPrice()))
@@ -26,6 +39,12 @@ public class AdMapper {
                 .setAuthor(userService.getCurrentUser());
     }
 
+    /**
+     * Преобразует {@link AdEntity} в {@link ExtendedAd}.
+     *
+     * @param adEntity Сущность объявления, которую нужно преобразовать
+     * @return {@link ExtendedAd}, объект DTO содержащий полную информацию о товаре в объявлении
+     */
     public ExtendedAd map(AdEntity adEntity) {
         return new ExtendedAd()
                 .setPk(adEntity.getPk())
@@ -40,6 +59,12 @@ public class AdMapper {
                 .setPhone(adEntity.getAuthor().getPhone());
     }
 
+    /**
+     * Преобразует список {@link AdEntity} в {@link Ads}.
+     *
+     * @param adEntities Список объявлений, который нужно преобразовать
+     * @return {@link Ads}, объект DTO содержащий информацию об общем количестве объявлений и список всех объявлений
+     */
     public Ads map(List<AdEntity> adEntities) {
         return new Ads()
                 .setCount(adEntities.size())

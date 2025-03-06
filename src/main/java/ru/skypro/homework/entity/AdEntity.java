@@ -7,6 +7,9 @@ import lombok.experimental.Accessors;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Сущность, представляющая объявление.
+ */
 @Entity
 @Table(name = "ads")
 @Data
