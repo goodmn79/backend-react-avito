@@ -37,8 +37,8 @@ public class ImageService {
                     .setSize(file.getSize())
                     .setMediaType(file.getContentType())
                     .setData(file.getBytes());
-        }catch (IOException e) {
-            log.error(e.getMessage());
+        } catch (IOException e) {
+            log.error("{}. Ошибка сохраненния изображения!", e.getMessage());
             throw new UnsuccessfulImageSavingException();
         }
 
@@ -64,7 +64,7 @@ public class ImageService {
         Path imagePath = Path.of(path);
         try {
             Files.write(imagePath, image.getData());
-        }catch (IOException e) {
+        } catch (IOException e) {
             log.error(e.getMessage());
             throw new UnsuccessfulImageSavingException();
         }

@@ -45,7 +45,7 @@ public class WebSecurityConfig {
                                         .mvcMatchers(HttpMethod.PATCH, "/ads/**", "/comments/**")
                                         .authenticated()
                                         .mvcMatchers(HttpMethod.GET, "/ads/{id}", "/ads/me")
-                                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN"))
+                                        .authenticated())
                 .cors()
                 .and()
                 .httpBasic(withDefaults());

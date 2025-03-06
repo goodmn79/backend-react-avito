@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
@@ -15,6 +16,7 @@ import ru.skypro.homework.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class UserController {
     public void setPassword(@RequestBody NewPassword newPassword,
                             HttpServletResponse response,
                             HttpServletRequest request) {
+        log.info("Вызван метод 'setPassword'");
         userService.updatePassword(newPassword);
         authService.clearSecurityContext(response, request);
     }
@@ -35,12 +38,14 @@ public class UserController {
     @Operation(summary = "Получение информации об авторизованном пользователе")
     @GetMapping("/me")
     public User getUser() {
+        log.info("Вызван метод 'getUser'");
         return userService.getUser();
     }
 
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
+        log.info("Вызван метод 'updateUser'");
         return userService.updateUser(updateUser);
     }
 
@@ -49,6 +54,7 @@ public class UserController {
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
     public void updateUserImage(@RequestParam("image") MultipartFile image) {
+        log.info("Вызван метод 'updateUserImage'");
         userService.updateUserImage(image);
     }
 }
