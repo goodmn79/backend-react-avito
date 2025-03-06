@@ -59,7 +59,7 @@ public class ImageService {
         }
     }
 
-    private void saveToDir(Image image) {
+    public void saveToDir(Image image) {
         String path = imageDir + image.getPath();
         Path imagePath = Path.of(path);
         try {
