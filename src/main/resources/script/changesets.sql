@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS images
 (
     id         SERIAL PRIMARY KEY,
     path       VARCHAR(32)  NOT NULL,
-    size       BIGINT       NOT NULL,
+    size       INT          NOT NULL,
     media_type VARCHAR(128) NOT NULL
 );
 

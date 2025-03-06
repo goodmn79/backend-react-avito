@@ -10,11 +10,16 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
+import ru.skypro.homework.entity.Image;
+import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Slf4j
 @RestController
@@ -53,9 +58,18 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestParam("image") MultipartFile image) {
+    public void updateUserImage(@RequestParam("image") MultipartFile image, HttpServletResponse response) {
         log.info("Вызван метод 'updateUserImage'");
-        userService.updateUserImage(image);
+        Image userImage = userService.updateUserImage(image);
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(userImage.getMediaType());
+        response.setContentLength(userImage.getSize());
+        try (OutputStream out = response.getOutputStream()) {
+            Files.copy(Path.of(userImage.getPath()), out);
+        } catch (Exception e) {
+            log.error("{}. Ошибка загрузки изображения!", e.getMessage());
+            throw new UnsuccessfulImageSavingException();
+        }
     }
 }
 

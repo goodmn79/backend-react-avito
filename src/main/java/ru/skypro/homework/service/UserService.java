@@ -64,12 +64,13 @@ public class UserService {
         log.info("Пользователь успешно сохранён.");
     }
 
-    public void updateUserImage(MultipartFile file) {
+    public Image updateUserImage(MultipartFile file) {
         log.warn("Обновление аватара текущего пользователя.");
         UserEntity user = this.getCurrentUser();
         Image userImage = imageService.saveImage(file, user.getId());
         userRepository.save(user.setImage(userImage));
         log.info("Аватар успешно обновлён.");
+        return userImage;
     }
 
     public boolean userExists(String username) {

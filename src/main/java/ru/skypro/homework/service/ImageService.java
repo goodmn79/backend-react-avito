@@ -34,7 +34,7 @@ public class ImageService {
 
         try {
             image.setPath(path)
-                    .setSize(file.getSize())
+                    .setSize((int) file.getSize())
                     .setMediaType(file.getContentType())
                     .setData(file.getBytes());
         } catch (IOException e) {

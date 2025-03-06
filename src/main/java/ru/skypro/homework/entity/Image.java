@@ -14,7 +14,7 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String path;
-    private long size;
+    private int size;
     private String mediaType;
     @Transient
     private byte[] data;
