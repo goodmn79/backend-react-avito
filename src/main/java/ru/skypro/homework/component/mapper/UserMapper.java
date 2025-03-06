@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.dto.user.Register;
+import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.UserEntity;
 
@@ -22,6 +23,16 @@ public class UserMapper {
                 .setPhone(user.getPhone())
                 .setRole(user.getRole())
                 .setImage(this.getUserImage(user));
+    }
+
+    public UserEntity map(UpdateUser updateUser, UserEntity user) {
+        return user
+                .setFirstName(
+                        DataValidator.validatedData(updateUser.getFirstName(), 2, 16))
+                .setLastName(
+                        DataValidator.validatedData(updateUser.getLastName(), 2, 16))
+                .setPhone(
+                        DataValidator.validatedPhoneNumber(updateUser.getPhone()));
     }
 
     public UserEntity map(Register register) {

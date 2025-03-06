@@ -4,8 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class WrongCurrentPasswordException extends RuntimeException {
-    public WrongCurrentPasswordException(String message) {
-        super(message);
+public class PasswordDoesNotMatchException extends RuntimeException {
+    public PasswordDoesNotMatchException() {
     }
 }

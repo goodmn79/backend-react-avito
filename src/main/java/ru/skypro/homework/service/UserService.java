@@ -15,11 +15,9 @@ import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.PasswordDoesNotMatchException;
 import ru.skypro.homework.exception.UserNotFoundException;
-import ru.skypro.homework.exception.WrongCurrentPasswordException;
 import ru.skypro.homework.repository.UserRepository;
-
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -32,15 +30,14 @@ public class UserService {
     private final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public void updatePassword(NewPassword newPassword) {
+        UserEntity currentUser = this.getCurrentUser();
         log.warn("Изменение пароля авторизованного пользователя.");
-        String currentPassword =
-                DataValidator.validatedData(newPassword.getCurrentPassword(), 8, 16);
-        this.checkPassword(currentPassword);
+        this.checkPassword(newPassword.getCurrentPassword(), currentUser.getPassword());
         String updatedPassword =
                 encoder.encode(
                         DataValidator.validatedData(newPassword.getNewPassword(), 8, 16)
                 );
-        userRepository.save(this.getCurrentUser().setPassword(updatedPassword));
+        userRepository.save(currentUser.setPassword(updatedPassword));
         log.info("Пароль авторизованного пользователя успешно изменён.");
     }
 
@@ -53,28 +50,21 @@ public class UserService {
 
     public UpdateUser updateUser(UpdateUser updateUser) {
         log.warn("Обновление данных авторизованного пользователя.");
-        UserEntity user =
-                this.getCurrentUser()
-                        .setFirstName(
-                                DataValidator.validatedData(updateUser.getFirstName(), 2, 16))
-                        .setLastName(
-                                DataValidator.validatedData(updateUser.getLastName(), 2, 16))
-                        .setPhone(
-                                DataValidator.validatedPhoneNumber(updateUser.getPhone()));
-        userRepository.save(user);
+        userRepository.save(
+                userMapper.map(updateUser, this.getCurrentUser())
+        );
         log.info("Данные авторизованного пользователя успешно обновлены.");
         return updateUser;
     }
 
     public void addUser(Register register) {
-        log.warn("Валидация данных нового пользователя.");
         UserEntity user = userMapper.map(register);
         log.warn("Сохранение нового пользователя в базе данных.");
         userRepository.save(user);
         log.info("Пользователь успешно сохранён.");
     }
 
-    public void updateUserImage(MultipartFile file) throws IOException {
+    public void updateUserImage(MultipartFile file) {
         log.warn("Обновление аватара текущего пользователя.");
         UserEntity user = this.getCurrentUser();
         Image userImage = imageService.saveImage(file, user.getId());
@@ -94,9 +84,10 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    private void checkPassword(String password) {
-        if (!encoder.matches(password, this.getCurrentUser().getPassword())) {
-            throw new WrongCurrentPasswordException("The wrong current password has been introduced");
+    private void checkPassword(String password, String actualPassword) {
+        if (!encoder.matches(password, actualPassword)) {
+            log.error("Пароль для изменения в запросе не совпадает с паролем текущего пользователя!");
+            throw new PasswordDoesNotMatchException();
         }
     }
 }

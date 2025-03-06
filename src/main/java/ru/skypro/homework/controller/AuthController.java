@@ -23,6 +23,7 @@ public class AuthController {
             summary = "Авторизация пользователя")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Login login) {
+        log.info("Вызван метод 'login'");
         if (authService.login(login.getUsername(), login.getPassword())) {
             return ResponseEntity.ok().build();
         } else {
@@ -34,7 +35,7 @@ public class AuthController {
             summary = "Регистрация пользователя")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Register register) {
-
+        log.info("Вызван метод 'register'");
         if (authService.register(register)) {
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } else {
