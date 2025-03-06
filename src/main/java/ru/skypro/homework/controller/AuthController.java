@@ -19,7 +19,7 @@ import ru.skypro.homework.service.AuthService;
  * Обрабатывает HTTP-запросы для регистрации и авторизации пользователя.
  * </p>
  *
- * @author Powered by ©AYE.team
+ * @author Powered by ©AYE.team, sazonovfm, skypro-backend
  * @version 0.0.1-SNAPSHOT
  */
 @Slf4j
