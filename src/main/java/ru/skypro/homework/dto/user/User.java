@@ -5,6 +5,15 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import ru.skypro.homework.enums.Role;
 
+/**
+ * DTO класс для передачи данных пользователя.
+ * <p>
+ * Содержит полную информацию о пользователе.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Data
 @Accessors(chain = true)
 public class User {

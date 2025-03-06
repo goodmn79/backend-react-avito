@@ -5,11 +5,11 @@ import ru.skypro.homework.entity.Image;
 
 import java.io.IOException;
 
-
 public interface ImageService {
     Image saveImage(MultipartFile file, int id) throws IOException;
 
     void removeImage(int imageId);
+
 
     String buildFileName(MultipartFile file);
 }

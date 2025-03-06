@@ -5,7 +5,15 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.util.List;
-
+/**
+ * DTO класс для передачи данных комментария.
+ * <p>
+ * Содержит информацию о всех комментариях и их количестве.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Data
 @Accessors(chain = true)
 public class Comments {

@@ -15,12 +15,26 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * Конфигурационный класс безопасности приложения.
+ * Используется для настройки Spring Security, включая аутентификацию, авторизацию и CORS.
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class WebSecurityConfig {
+    /**
+     * Сервис для загрузки пользовательских данных при аутентификации.
+     */
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Массив путей, доступных без аутентификации.
+     * Включает Swagger-документацию и эндпоинты регистрации и входа.
+     */
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
@@ -30,6 +44,13 @@ public class WebSecurityConfig {
             "/register"
     };
 
+    /**
+     * Настройка цепочки фильтров безопасности.
+     *
+     * @param http объект конфигурации безопасности
+     * @return сконфигурированный {@link SecurityFilterChain}
+     * @throws Exception в случае ошибки конфигурации
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf()
@@ -45,13 +66,20 @@ public class WebSecurityConfig {
                                         .mvcMatchers(HttpMethod.PATCH, "/ads/**", "/comments/**")
                                         .authenticated()
                                         .mvcMatchers(HttpMethod.GET, "/ads/{id}", "/ads/me")
-                                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN"))
+                                        .authenticated())
                 .cors()
                 .and()
                 .httpBasic(withDefaults());
         return http.build();
     }
 
+    /**
+     * Конфигурация менеджера аутентификации.
+     *
+     * @param http объект конфигурации безопасности
+     * @return сконфигурированный {@link AuthenticationManager}
+     * @throws Exception в случае ошибки конфигурации
+     */
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         AuthenticationManagerBuilder authenticationManagerBuilder =
@@ -61,9 +89,14 @@ public class WebSecurityConfig {
         return authenticationManagerBuilder.build();
     }
 
+    /**
+     * Конфигурация кодировщика паролей.
+     * Используется BCrypt для безопасного хеширования паролей.
+     *
+     * @return экземпляр {@link PasswordEncoder}
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }
