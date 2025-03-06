@@ -69,7 +69,7 @@ public class CommentService {
         return commentRepository.findAllByAdPk(adId);
     }
 
-    private CommentEntity getCommentByAdId(int adId, int commentId) {
+    public CommentEntity getCommentByAdId(int adId, int commentId) {
         return this.getAdCommentEntities(adId)
                 .stream()
                 .filter(c -> c.getPk() == commentId)
