@@ -53,7 +53,7 @@ public class AdController {
      * <br> Endpoint: POST /ads
      *
      * @param jsonString строка с информацией объявления
-     * @param image файл с картинкой объявления
+     * @param image файл с изображением объявления
      * @return объект {@link Ad} созданное объявление
      * @throws IOException Если произошла ошибка при обработке изображения
      */
@@ -71,7 +71,7 @@ public class AdController {
      * <br> Доступ к методу имеет только аутентифицированный пользователь.
      * <br> Endpoint: GET /ads/{id}
      *
-     * @param id объявления
+     * @param id идентификатор объявления
      * @return объект {@link ExtendedAd} полная информация об объявлении
      */
     @Operation(summary = "Получение информации об объявлении")
@@ -87,7 +87,7 @@ public class AdController {
      * <br> Доступ к методу имеет пользователь с ролью ADMIN, либо автор объявления.
      * <br> Endpoint: DELETE /ads/{id}
      *
-     * @param id объявления
+     * @param id идентификатор объявления
      */
     @Operation(summary = "Удаление объявления")
     @DeleteMapping("/{id}")
@@ -102,7 +102,7 @@ public class AdController {
      * <br> Доступ к методу имеет только аутентифицированный пользователь.
      * <br> Endpoint: PATCH /ads/{id}
      *
-     * @param id объявления
+     * @param id идентификатор объявления
      * @param createOrUpdateAd информация для обновления объявления
      * @return объект {@link Ad} обновленное объявление
      */
@@ -135,9 +135,9 @@ public class AdController {
      * <br> Доступ к методу имеет только аутентифицированный пользователь.
      * <br> Endpoint: PATCH /ads/{id}/image
      *
-     * @param id объявления
+     * @param id идентификатор объявления
      * @param image файл с новой картинкой объявления
-     * @return объект {@link byte[]} массив байтов, содержащий данные обновлённого изображения.
+     * @return объект {@link byte[]} массив байтов, содержащий данные обновлённого изображения
      * @throws IOException Если произошла ошибка при обработке изображения
      */
     @Operation(summary = "Обновление картинки объявления",

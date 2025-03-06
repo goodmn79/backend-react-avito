@@ -17,6 +17,13 @@ import ru.skypro.homework.service.CommentService;
 
 import java.util.List;
 
+/**
+ * Реализация сервиса для работы с изображениями.
+ * <br> Этот класс реализует интерфейс {@link CommentService}
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
@@ -26,6 +33,12 @@ public class CommentServiceImpl implements CommentService {
 
     private final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
+    /**
+     * Получение комментариев объявления.
+     *
+     * @param id идентификатор объявления
+     * @return объект {@link Comments} с информацией об общем количестве комментариев и их список
+     */
     @Override
     public Comments getAdComments(int id) {
         log.info("Получение всех комментариев.");
@@ -33,6 +46,13 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.map(this.getAdCommentEntities(id));
     }
 
+    /**
+     * Добавление комментария к объявлению.
+     *
+     * @param id      идентификатор объявления
+     * @param comment текст комментария
+     * @return объект {@link Comment} с информацией о комментарии
+     */
     @Override
     public Comment addComment(int id, CreateOrUpdateComment comment) {
         log.info("Добавление комментария.");
@@ -47,6 +67,14 @@ public class CommentServiceImpl implements CommentService {
                 .map(commentRepository.save(entity));
     }
 
+    /**
+     * Обновление комментария.
+     *
+     * @param adId      идентификатор объявления
+     * @param commentId идентификатор комментария
+     * @param comment   текст нового комментария
+     * @return объект {@link Comment} с информацией о новом комментарии
+     */
     @Override
     public Comment updateComment(int adId, int commentId, CreateOrUpdateComment comment) {
         log.warn("Обновление комментария.");
@@ -61,6 +89,12 @@ public class CommentServiceImpl implements CommentService {
         return commentMapper.map(updatedEntity);
     }
 
+    /**
+     * Удаление комментария.
+     *
+     * @param adId      идентификатор объявления
+     * @param commentId идентификатор комментария
+     */
     @Override
     public void deleteComment(int adId, int commentId) {
         log.warn("Удаление комментария.");
@@ -70,10 +104,24 @@ public class CommentServiceImpl implements CommentService {
         log.info("Комментарий успешно удален.");
     }
 
+    /**
+     * Получение всех комментариев объявления.
+     *
+     * @param adId идентификатор объявления
+     * @return список комментариев {@link CommentEntity}
+     */
     private List<CommentEntity> getAdCommentEntities(int adId) {
         return commentRepository.findAllByAdPk(adId);
     }
 
+    /**
+     * Получение комментария объявления.
+     *
+     * @param adId      идентификатор объявления
+     * @param commentId идентификатор комментария
+     * @return объект {@link CommentEntity} содержащий комментарий
+     * @throws CommentNotFoundException Если комментарий не найден
+     */
     private CommentEntity getCommentByAdId(int adId, int commentId) {
         return this.getAdCommentEntities(adId)
                 .stream()
@@ -81,6 +129,11 @@ public class CommentServiceImpl implements CommentService {
                 .findFirst().orElseThrow(CommentNotFoundException::new);
     }
 
+    /**
+     * Проверка текущего пользователя на авторство комментария.
+     *
+     * @return {@code true}, если текущий пользователь является автором комментария, иначе {@code false}
+     */
     @Override
     public boolean isCommentAuthor(int adId, int commentId, String currentUsername) {
         String commentAuthorName = this.getCommentByAdId(adId, commentId).getAuthor().getUsername();

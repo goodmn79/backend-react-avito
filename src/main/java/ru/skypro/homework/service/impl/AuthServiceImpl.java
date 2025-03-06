@@ -16,6 +16,13 @@ import ru.skypro.homework.service.UserService;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Реализация сервиса для обработки аутентификации и регистрации пользователей.
+ * <br> Этот класс реализует интерфейс {@link AuthService}.
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -25,6 +32,13 @@ public class AuthServiceImpl implements AuthService {
 
     private final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
+    /**
+     * Выполнение процесса входа в систему.
+     *
+     * @param username Имя пользователя
+     * @param password Пароль пользователя
+     * @return {@code true}, если аутентификация прошла успешно, иначе {@code false}
+     */
     @Override
     public boolean login(String username, String password) {
         log.warn("Аутентификация пользователя...");
@@ -40,6 +54,12 @@ public class AuthServiceImpl implements AuthService {
         return false;
     }
 
+    /**
+     * Регистрация нового пользователя в системе.
+     *
+     * @param register Объект, содержащий данные для регистрации нового пользователя
+     * @return {@code true}, если регистрация прошла успешно, иначе {@code false}
+     */
     @Override
     public boolean register(Register register) {
         log.info("Регистрация нового пользователя...");
@@ -52,6 +72,12 @@ public class AuthServiceImpl implements AuthService {
         return true;
     }
 
+    /**
+     * Очистка контекста безопасности.
+     *
+     * @param response Ответ, который будет отправлен клиенту
+     * @param request  Запрос, связанный с текущей сессией пользователя
+     */
     @Override
     public void clearSecurityContext(HttpServletResponse response, HttpServletRequest request) {
         log.warn("Завершение сеанса!");

@@ -17,6 +17,7 @@ import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.AdNotFoundException;
+import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.service.ImageService;
@@ -25,6 +26,13 @@ import ru.skypro.homework.service.UserService;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Реализация сервиса для работы с объявлениями.
+ * <br> Этот класс реализует интерфейс {@link AdService}
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class AdServiceImpl implements AdService {
@@ -36,6 +44,11 @@ public class AdServiceImpl implements AdService {
 
     private final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
 
+    /**
+     * Получение всех объявлений.
+     *
+     * @return {@link Ads} объект содержащий информацию об общем количестве объявлений и список всех объявлений
+     */
     @Override
     public Ads getAllAds() {
         log.info("Получение всех объявлений.");
@@ -46,6 +59,14 @@ public class AdServiceImpl implements AdService {
         return adMapper.map(ads);
     }
 
+    /**
+     * Добавление объявления.
+     *
+     * @param jsonString строка с информацией объявления
+     * @param image      файл с изображением объявления
+     * @return объект {@link Ad} созданное объявление
+     * @throws IOException Если произошла ошибка при обработке изображения
+     */
     @Override
     @Transactional
     public Ad addAd(String jsonString, MultipartFile image) throws IOException {
@@ -64,6 +85,12 @@ public class AdServiceImpl implements AdService {
         return adMapper.map(ad);
     }
 
+    /**
+     * Получение информации об объявлении.
+     *
+     * @param pk идентификатор объявления
+     * @return объект {@link ExtendedAd} полная информация об объявлении
+     */
     @Override
     public ExtendedAd getAdById(int pk) {
         log.info("Запрос на получение полного описания объявления.");
@@ -74,6 +101,11 @@ public class AdServiceImpl implements AdService {
         return adMapper.map(adEntity);
     }
 
+    /**
+     * Удаление объявления.
+     *
+     * @param pk идентификатор объявления
+     */
     @Override
     @Transactional
     public void removeAdById(int pk) {
@@ -87,6 +119,13 @@ public class AdServiceImpl implements AdService {
         log.info("Объявление успешно удалено");
     }
 
+    /**
+     * Обновление информации об объявлении.
+     *
+     * @param pk               идентификатор объявления
+     * @param createOrUpdateAd информация для обновления объявления
+     * @return объект {@link Ad} обновленное объявление
+     */
     @Override
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
         log.info("Запрос на обновление объявления.");
@@ -105,6 +144,14 @@ public class AdServiceImpl implements AdService {
         return adMapper.map(updatedEntity);
     }
 
+    /**
+     * Обновление картинки объявления.
+     *
+     * @param pk    идентификатор объявления
+     * @param image файл с новой картинкой объявления
+     * @return объект {@link byte[]} массив байтов, содержащий данные обновлённого изображения.
+     * @throws IOException Если произошла ошибка при обработке изображения
+     */
     @Override
     @Transactional
     public byte[] updateImage(int pk, MultipartFile image) throws IOException {
@@ -120,6 +167,11 @@ public class AdServiceImpl implements AdService {
         return adImage.getData();
     }
 
+    /**
+     * Получение объявлений авторизованного пользователя.
+     *
+     * @return объект {@link Ads} с информацией о количестве объявлений и их списком
+     */
     @Override
     public Ads getAds() {
         log.info("Запрос на получение объявлений авторизованного пользователя.");
@@ -132,6 +184,12 @@ public class AdServiceImpl implements AdService {
         return adsMe;
     }
 
+    /**
+     * Получение информации об объявлении.
+     *
+     * @return объект {@link AdEntity} с информацией об объявлении
+     * @throws AdNotFoundException Если объявление не найдено
+     */
     @Override
     public AdEntity getAdEntity(int pk) {
         return
@@ -142,6 +200,11 @@ public class AdServiceImpl implements AdService {
                         });
     }
 
+    /**
+     * Проверка текущего пользователя на авторство объявления.
+     *
+     * @return {@code true}, если текущий пользователь является автором объявления, иначе {@code false}
+     */
     @Override
     public boolean isAdAuthor(int pk, String currentUsername) {
         String adAuthorUsername = this.getAdEntity(pk).getAuthor().getUsername();

@@ -18,6 +18,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+/**
+ * Реализация сервиса для работы с изображениями.
+ * <br> Этот класс реализует интерфейс {@link ImageService}
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
@@ -28,6 +35,15 @@ public class ImageServiceImpl implements ImageService {
 
     private final Logger log = LoggerFactory.getLogger(ImageServiceImpl.class);
 
+    /**
+     * Сохранение изображения.
+     *
+     * @param file файл с изображением
+     * @param id   идентификатор изображения
+     * @return {@link Image} новое или обновленное изображение
+     * @throws UnsuccessfulImageSavingException Если не удалось сохранение
+     */
+    @Override
     public Image saveImage(MultipartFile file, int id) {
         log.info("Сохранение фото.");
         Image image = imageRepository.findById(id).orElse(new Image());
@@ -47,6 +63,13 @@ public class ImageServiceImpl implements ImageService {
         return imageRepository.save(image);
     }
 
+    /**
+     * Удаление изображения.
+     *
+     * @param imageId идентификатор изображения
+     * @throws ImageNotFoundException Если изображение не найдено
+     */
+    @Override
     public void removeImage(int imageId) {
         try {
             Image image =
@@ -60,6 +83,12 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
+    /**
+     * Сохранение пути файла изображения.
+     *
+     * @param image данные изображения
+     * @throws UnsuccessfulImageSavingException Если не удалось сохранение
+     */
     private void saveToDir(Image image) {
         String path = imageDir + image.getPath();
         Path imagePath = Path.of(path);
@@ -72,6 +101,13 @@ public class ImageServiceImpl implements ImageService {
         log.debug("Изображение сохранено в: '{}'", path);
     }
 
+    /**
+     * Создание имени изображения.
+     *
+     * @param file файл изображения
+     * @return Строка с именем изображения
+     */
+    @Override
     public String buildFileName(MultipartFile file) {
         String fileName = DataValidator.validatedImage(file);
         return System.currentTimeMillis() + ImageExtension.getExtension(fileName);

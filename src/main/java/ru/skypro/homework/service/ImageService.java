@@ -3,13 +3,17 @@ package ru.skypro.homework.service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.entity.Image;
 
-import java.io.IOException;
-
+/**
+ * Сервис для работы с изображениями.
+ * <br> Этот интерфейс предоставляет методы для операций с изображениями (аватар пользователя и картинка объявления).
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 public interface ImageService {
-    Image saveImage(MultipartFile file, int id) throws IOException;
+    Image saveImage(MultipartFile file, int id);
 
     void removeImage(int imageId);
-
 
     String buildFileName(MultipartFile file);
 }
