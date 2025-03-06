@@ -5,6 +5,15 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+/**
+ * DTO класс для передачи данных объявления.
+ * <p>
+ * Содержит полную информацию об объявлении.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Accessors(chain = true)

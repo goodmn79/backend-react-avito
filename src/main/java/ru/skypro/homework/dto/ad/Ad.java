@@ -4,6 +4,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ * DTO класс для передачи данных объявления.
+ * <p>
+ * Содержит краткую информацию об объявлении.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Data
 @Accessors(chain = true)
 public class Ad {
