@@ -6,6 +6,15 @@ import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotBlank;
 
+/**
+ * DTO класс для передачи данных комментария.
+ * <p>
+ * Содержит текст комментария для его добавления или обновления.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Data
 @Accessors(chain = true)
 public class CreateOrUpdateComment {

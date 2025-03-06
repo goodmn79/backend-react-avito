@@ -5,6 +5,15 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import ru.skypro.homework.enums.Role;
 
+/**
+ * DTO класс для передачи данных пользователя.
+ * <p>
+ * Содержит информацию для регистрации пользователя.
+ * </p>
+ *
+ * @author Powered by ©AYE.team, sazonovfm
+ * @version 0.0.1-SNAPSHOT
+ */
 @Data
 @Accessors(chain = true)
 public class Register {
