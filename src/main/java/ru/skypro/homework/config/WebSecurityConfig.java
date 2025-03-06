@@ -18,6 +18,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 /**
  * Конфигурационный класс безопасности приложения.
  * Используется для настройки Spring Security, включая аутентификацию, авторизацию и CORS.
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
  */
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)

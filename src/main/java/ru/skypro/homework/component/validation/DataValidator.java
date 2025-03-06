@@ -11,6 +11,9 @@ import java.util.regex.Pattern;
 
 /**
  * Утилитарный класс для валидации входных данных.
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
  */
 public abstract class DataValidator {
     private static final Logger log = LoggerFactory.getLogger(DataValidator.class);
