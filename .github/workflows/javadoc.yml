@@ -38,7 +38,7 @@ jobs:
       # Шаг 5: Копируем сгенерированный Javadoc в директорию для gh-pages
       - name: Copy new Javadoc to gh-pages
         run: |
-          cp -r target/docs/* docs/javadoc/  
+          cp -r docs/* docs/javadoc/  
 
       # Шаг 6: Коммитим и пушим изменения на ветку gh-pages
       - name: Commit and push Javadoc to gh-pages
