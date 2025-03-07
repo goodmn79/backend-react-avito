@@ -47,4 +47,4 @@ jobs:
           git config --global user.email "actions@github.com"
           git add docs/javadoc/
           git commit -m "Update Javadoc" || echo "No changes to commit"
-          git push origin gh-pages
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
