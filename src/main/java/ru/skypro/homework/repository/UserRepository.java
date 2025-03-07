@@ -30,4 +30,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Integer> {
      * @return `true`, если пользователь с таким именем уже существует, иначе `false`.
      */
     boolean existsByUsername(String username);
+
+    /**
+     * Сохранение пользователя по имени.
+     *
+     * @param user имя пользователя
+     * @return сущность пользователя {@link UserEntity}
+     */
+    UserEntity save(UserEntity user);
 }

@@ -1,8 +1,9 @@
 package ru.skypro.homework.entity;
 
-import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import javax.persistence.*;
 
 /**
  * Сущность, представляющая изображение.
@@ -14,10 +15,18 @@ import lombok.experimental.Accessors;
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "path")
     private String path;
-    private int size;
+
+    @Column(name = "size")
+    private long size;
+
+    @Column(name = "mediaType")
     private String mediaType;
+
     @Transient
     private byte[] data;
 }

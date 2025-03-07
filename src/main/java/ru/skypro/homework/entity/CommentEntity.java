@@ -14,15 +14,20 @@ import lombok.experimental.Accessors;
 public class CommentEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "pk")
     private int pk;
-    private long cratedAt;
+
+    @Column(name = "createdAt")
+    private long createdAt;
+
+    @Column(name = "text")
     private String text;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private UserEntity author;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ad_pk", nullable = false)
     private AdEntity ad;
 }
