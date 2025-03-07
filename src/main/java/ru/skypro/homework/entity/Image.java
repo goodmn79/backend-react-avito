@@ -15,10 +15,18 @@ import javax.persistence.*;
 public class Image {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
+
+    @Column(name = "path")
     private String path;
+
+    @Column(name = "size")
     private long size;
+
+    @Column(name = "mediaType")
     private String mediaType;
+
     @Transient
     private byte[] data;
 }

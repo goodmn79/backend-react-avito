@@ -24,4 +24,22 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
      * @return список комментариев {@link CommentEntity}
      */
     List<CommentEntity> findAllByAdPk(int id);
+
+    /**
+     * Сохраняет комментарий в базе данных.
+     * Если комментарий новый (идентификатор не задан), создает новую запись.
+     * Если комментарий уже существует, обновляет данные.
+     *
+     * @param comment комментарий для сохранения (не может быть null)
+     * @return сохраненный комментарий (никогда не null)
+     */
+    <S extends CommentEntity> S save(S comment);
+
+    /**
+     * Удаляет комментарий по его идентификатору.
+     *
+     * @param id идентификатор комментария для удаления (не может быть null)
+     * @throws org.springframework.dao.EmptyResultDataAccessException если комментарий с указанным ID не найден
+     */
+    void delete(CommentEntity id);
 }
