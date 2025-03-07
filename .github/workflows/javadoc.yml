@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - dev  # Запускать действие при пуше в ветку dev
+  workflow_dispatch:
 
 jobs:
   generate-javadoc:
