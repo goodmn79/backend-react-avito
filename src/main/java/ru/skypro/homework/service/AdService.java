@@ -1,6 +1,5 @@
 package ru.skypro.homework.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,6 @@ import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.repository.AdRepository;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -29,59 +27,57 @@ public class AdService {
     private final AdMapper adMapper;
     private final ImageService imageService;
     private final UserService userService;
-    private final ObjectMapper objectMapper;
 
     private final Logger log = LoggerFactory.getLogger(AdService.class);
 
     public Ads getAllAds() {
-        log.info("Получение всех объявлений.");
+        log.info("Getting all ads...");
 
         List<AdEntity> ads = adRepository.findAll();
-        log.info("Объявления успешно получены.");
+        log.info("The ads were successfully received.");
 
         return adMapper.map(ads);
     }
 
     @Transactional
-    public Ad addAd(String jsonString, MultipartFile image) throws IOException {
-        log.info("Создание объявления.");
-        CreateOrUpdateAd createOrUpdateAd = objectMapper.readValue(jsonString, CreateOrUpdateAd.class);
+    public Ad addAd(CreateOrUpdateAd createOrUpdateAd, MultipartFile image) {
+        log.info("Creating an ad...");
         AdEntity entity = adMapper.map(createOrUpdateAd);
 
-        entity.setAuthor(userService.getCurrentUser());
+        entity
+                .setAuthor(userService.getCurrentUser())
+                .setImage(this.getAdImage(entity.getPk(), image));
 
-        Image savedImage = imageService.saveImage(image, entity.getPk());
+        log.debug("Saving an ad in a database.");
+        AdEntity ad = adRepository.save(entity);
 
-        log.debug("Сохранение объявления в базе данных.");
-        AdEntity ad = adRepository.save(entity.setImage(savedImage));
-
-        log.info("Объявление успешно создано.");
+        log.info("The ad was created successfully.");
         return adMapper.map(ad);
     }
 
     public ExtendedAd getAdById(int pk) {
-        log.info("Запрос на получение полного описания объявления.");
+        log.info("Request to get the full description of the ad...");
 
         AdEntity adEntity = this.getAdEntity(pk);
 
-        log.info("Полное описание объявления успешно получено.");
+        log.info("The full description of the ad was successfully received.");
         return adMapper.map(adEntity);
     }
 
     @Transactional
     public void removeAdById(int pk) {
-        log.warn("Удаление объявления.");
+        log.warn("Deleting an ad...");
 
         AdEntity entity = this.getAdEntity(pk);
         int imageId = entity.getImage().getId();
 
         imageService.removeImage(imageId);
         adRepository.deleteById(entity.getPk());
-        log.info("Объявление успешно удалено");
+        log.info("The ad was successfully deleted.");
     }
 
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
-        log.info("Запрос на обновление объявления.");
+        log.info("Request to update the ad.");
         AdEntity adEntity = this.getAdEntity(pk)
                 .setTitle(
                         DataValidator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
@@ -90,35 +86,35 @@ public class AdService {
                 .setPrice(
                         DataValidator.validatedPrice(createOrUpdateAd.getPrice()));
 
-        log.debug("Сохранение изменений объявления в базе данных.");
+        log.debug("Saving ad changes in the database.");
         AdEntity updatedEntity = adRepository.save(adEntity);
 
-        log.info("Объявление успешно обновлено.");
+        log.info("The ad has been successfully updated.");
         return adMapper.map(updatedEntity);
     }
 
     @Transactional
-    public byte[] updateImage(int pk, MultipartFile image) throws IOException {
-        log.info("Изменение изображения объявления.");
+    public byte[] updateImage(int pk, MultipartFile image) {
+        log.info("Changing the ad image.");
 
-        Image adImage = imageService.saveImage(image, pk);
+        Image adImage = this.getAdImage(pk, image);
 
-        log.debug("Сохранение нового изображения объявления в базе данных.");
+        log.debug("Saving a new ad image in the database.");
         adRepository.save(this.getAdEntity(pk))
                 .setImage(adImage);
 
-        log.info("Изображение для объявления успешно обновлено.");
+        log.info("The image for the ad has been successfully updated.");
         return adImage.getData();
     }
 
     public Ads getAds() {
-        log.info("Запрос на получение объявлений авторизованного пользователя.");
+        log.info("A request to receive ads from an authorized user.");
         UserEntity currentUser = userService.getCurrentUser();
 
         List<AdEntity> userAds = adRepository.findByAuthor(currentUser);
         Ads adsMe = adMapper.map(userAds);
 
-        log.info("Объявления авторизованного пользователя успешно получены.");
+        log.info("The ads of the authorized user were successfully received.");
         return adsMe;
     }
 
@@ -126,7 +122,7 @@ public class AdService {
         return
                 adRepository.findById(pk)
                         .orElseThrow(() -> {
-                            log.error("Объявление не найдено!");
+                            log.error("The ad was not found!");
                             return new AdNotFoundException();
                         });
     }
@@ -134,5 +130,12 @@ public class AdService {
     public boolean isAdAuthor(int pk, String currentUsername) {
         String adAuthorUsername = this.getAdEntity(pk).getAuthor().getUsername();
         return adAuthorUsername.equals(currentUsername);
+    }
+
+    private Image getAdImage(int pk, MultipartFile image) {
+        AdEntity adEntity = this.getAdEntity(pk);
+        return adEntity.getImage() == null ?
+                imageService.saveImage(image) :
+                imageService.updateImage(image, adEntity.getImage().getId());
     }
 }

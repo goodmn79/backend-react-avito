@@ -15,10 +15,8 @@ import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.service.AdService;
 
-import java.io.IOException;
-
 @Slf4j
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
 @RequiredArgsConstructor
@@ -29,24 +27,24 @@ public class AdController {
     @Operation(summary = "Получение всех объявлений")
     @GetMapping
     public Ads getAllAds() {
-        log.info("Вызван метод 'getAllAds'");
+        log.info("Invoke method 'getAllAds'");
         return adService.getAllAds();
     }
 
     @Operation(summary = "Добавление объявления")
     @PostMapping(consumes = "multipart/form-data", produces = "application/json")
     @PreAuthorize("isAuthenticated()")
-    public Ad addAd(@RequestParam("properties") String jsonString,
-                    @RequestPart("image") MultipartFile image) throws IOException {
-        log.info("Вызван метод 'addAd'");
-        return adService.addAd(jsonString, image);
+    public Ad addAd(@RequestPart("properties") CreateOrUpdateAd createOrUpdateAd,
+                    @RequestPart("image") MultipartFile image) {
+        log.info("Invoke method 'addAd'");
+        return adService.addAd(createOrUpdateAd, image);
     }
 
     @Operation(summary = "Получение информации об объявлении")
     @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ExtendedAd getExtendedAd(@PathVariable("id") int id) {
-        log.info("Вызван метод 'getExtendedAd'");
+        log.info("Invoke method 'getExtendedAd'");
         return adService.getAdById(id);
     }
 
@@ -54,7 +52,7 @@ public class AdController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or @adService.isAdAuthor(#id, authentication.principal.username)")
     public void removeAd(@PathVariable("id") int id) {
-        log.info("Вызван метод 'removeAd'");
+        log.info("Invoke method 'removeAd'");
         adService.removeAdById(id);
     }
 
@@ -63,7 +61,7 @@ public class AdController {
     @PreAuthorize("isAuthenticated()")
     public Ad updateAds(@PathVariable("id") int id,
                         @RequestBody CreateOrUpdateAd createOrUpdateAd) {
-        log.info("Вызван метод 'updateAds'");
+        log.info("Invoke method 'updateAds'");
         return adService.updateAdById(id, createOrUpdateAd);
     }
 
@@ -71,7 +69,7 @@ public class AdController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public Ads getAdsMe() {
-        log.info("Вызван метод 'getAdsMe'");
+        log.info("Invoke method 'getAdsMe'");
         return adService.getAds();
     }
 
@@ -81,8 +79,8 @@ public class AdController {
     @PatchMapping("/{id}/image")
     @PreAuthorize("isAuthenticated()")
     public byte[] updateImage(@PathVariable("id") int id,
-                              @RequestParam("image") MultipartFile image) throws IOException {
-        log.info("Вызван метод 'updateImage'");
+                              @RequestParam("image") MultipartFile image) {
+        log.info("Invoke method 'updateImage'");
         return adService.updateImage(id, image);
     }
 }

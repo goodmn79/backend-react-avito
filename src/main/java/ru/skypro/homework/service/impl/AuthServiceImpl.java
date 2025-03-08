@@ -27,34 +27,37 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public boolean login(String username, String password) {
-        log.warn("Аутентификация пользователя...");
-        UserDetails user = userDetailService.loadUserByUsername(username);
-        log.info("Пользователь найден.");
+        log.warn("User authentication...");
 
-        if (encoder.matches(password, user.getPassword())) {
-            log.info("Успешная аутентификация пользователя.");
-            return true;
+        if (userService.userExists(username)) {
+            UserDetails user = userDetailService.loadUserByUsername(username);
+            log.info("The user has been found.");
+
+            if (encoder.matches(password, user.getPassword())) {
+                log.info("Successful user authentication.");
+                return true;
+            }
         }
 
-        log.error("Неудачная аутентификация пользователя.");
+        log.error("Failed user authentication.");
         return false;
     }
 
     @Override
     public boolean register(Register register) {
-        log.info("Регистрация нового пользователя...");
+        log.info("Registering a new user...");
         if (userService.userExists(register.getUsername())) {
-            log.error("Пользователь уже существует!");
+            log.error("The user already exists!");
             return false;
         }
         userService.addUser(register);
-        log.info("Регистрация пользователя успешно завершена.");
+        log.info("User registration completed successfully.");
         return true;
     }
 
     @Override
     public void clearSecurityContext(HttpServletResponse response, HttpServletRequest request) {
-        log.warn("Завершение сеанса!");
+        log.warn("Session Termination!");
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -63,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.clearContext();
         request.getSession().invalidate();
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            log.info("Контекст безопасности очищен.");
+            log.info("The security context is cleared.");
         }
     }
 }

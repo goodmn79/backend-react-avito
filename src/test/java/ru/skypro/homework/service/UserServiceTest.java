@@ -20,7 +20,7 @@ import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.PasswordDoesNotMatchException;
-import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
+import ru.skypro.homework.exception.UnsuccessImageProcessingException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.repository.UserRepository;
 
@@ -213,39 +213,72 @@ class UserServiceTest {
         }
 
         @Test
-        void testUpdateUserImage_shouldSaveImage() {
+        void testUpdateOrCreateUserImage_whenImageSuccessSaved_shouldReturnSavedImage() {
             MultipartFile file = mock(MultipartFile.class);
-            Image image = mock(Image.class);
-            when(userRepository.findByUsername(testEntity.getUsername())).thenReturn(Optional.of(testEntity));
-            when(imageService.saveImage(file, testEntity.getId()))
-                    .thenReturn(image);
-            when(userRepository.save(testEntity)).thenReturn(testEntity);
+            testEntity.setImage(null);
+            when(userRepository.findByUsername(testEntity.getUsername()))
+                    .thenReturn(Optional.of(testEntity));
+            when(userRepository.save(testEntity))
+                    .thenReturn(testEntity);
 
-            userService.updateUserImage(file);
+            userService.updateOrCreateUserImage(file);
 
-            verify(userRepository, times(1)).findByUsername(testEntity.getUsername());
-            verify(userRepository, times(1)).save(testEntity);
-            verify(imageService, times(1)).saveImage(file, testEntity.getId());
+            verify(userRepository, times(1))
+                    .findByUsername(testEntity.getUsername());
+            verify(userRepository, times(1))
+                    .save(testEntity);
+            verify(imageService, times(1))
+                    .saveImage(any(MultipartFile.class));
         }
 
         @Test
-        void testUpdateUserImage_whenUserNotFound_shouldThrowException() {
+        void testUpdateOrCreateUserImage_whenImageSuccessUpdated_shouldReturnSavedImage() {
+            MultipartFile file = mock(MultipartFile.class);
+            when(userRepository.findByUsername(testEntity.getUsername()))
+                    .thenReturn(Optional.of(testEntity));
+            when(userRepository.save(testEntity))
+                    .thenReturn(testEntity);
+
+            userService.updateOrCreateUserImage(file);
+
+            verify(userRepository, times(1))
+                    .findByUsername(testEntity.getUsername());
+            verify(userRepository, times(1))
+                    .save(testEntity);
+            verify(imageService, times(1))
+                    .updateImage(any(MultipartFile.class), anyInt());
+        }
+
+        @Test
+        void testUpdateOrCreateUserImage_whenUserNotFound_shouldThrowException() {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> userService.updateUserImage(mock(MultipartFile.class)))
+            assertThatThrownBy(() -> userService.updateOrCreateUserImage(mock(MultipartFile.class)))
                     .isInstanceOf(UserNotFoundException.class);
         }
 
         @Test
-        void testUpdateUserImage_whenUnsuccessfulImageSaving_shouldThrowException() {
+        void testUpdateOrCreateUserImage_whenUnsuccessfulImageSavingByUpdating_shouldThrowException() {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
-            when(imageService.saveImage(any(MultipartFile.class), anyInt()))
-                    .thenThrow(UnsuccessfulImageSavingException.class);
+            when(imageService.updateImage(any(MultipartFile.class), anyInt()))
+                    .thenThrow(UnsuccessImageProcessingException.class);
 
-            assertThatThrownBy(() -> userService.updateUserImage(mock(MultipartFile.class)))
-                    .isInstanceOf(UnsuccessfulImageSavingException.class);
+            assertThatThrownBy(() -> userService.updateOrCreateUserImage(mock(MultipartFile.class)))
+                    .isInstanceOf(UnsuccessImageProcessingException.class);
+        }
+
+        @Test
+        void testUpdateOrCreateUserImage_whenUnsuccessfulImageSavingBySaving_shouldThrowException() {
+            testEntity.setImage(null);
+            when(userRepository.findByUsername(testEntity.getUsername()))
+                    .thenReturn(Optional.of(testEntity));
+            when(imageService.saveImage(any(MultipartFile.class)))
+                    .thenThrow(UnsuccessImageProcessingException.class);
+
+            assertThatThrownBy(() -> userService.updateOrCreateUserImage(mock(MultipartFile.class)))
+                    .isInstanceOf(UnsuccessImageProcessingException.class);
         }
 
         @Test

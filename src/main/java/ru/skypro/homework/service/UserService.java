@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.mapper.UserMapper;
 import ru.skypro.homework.component.validation.DataValidator;
@@ -31,51 +32,56 @@ public class UserService {
 
     public void updatePassword(NewPassword newPassword) {
         UserEntity currentUser = this.getCurrentUser();
-        log.warn("Изменение пароля авторизованного пользователя.");
+        log.warn("Changing the password of an authorized user.");
         this.checkPassword(newPassword.getCurrentPassword(), currentUser.getPassword());
         String updatedPassword =
                 encoder.encode(
                         DataValidator.validatedData(newPassword.getNewPassword(), 8, 16)
                 );
         userRepository.save(currentUser.setPassword(updatedPassword));
-        log.info("Пароль авторизованного пользователя успешно изменён.");
+        log.info("The password of the authorized user has been successfully changed.");
     }
 
     public User getUser() {
-        log.warn("Получение данных авторизованного пользователя.");
+        log.warn("Getting authorized user data.");
         User user = userMapper.map(this.getCurrentUser());
-        log.info("Данные авторизованного пользователя успешно получены.");
+        log.info("The authorized user's data has been successfully received.");
         return user;
     }
 
     public UpdateUser updateUser(UpdateUser updateUser) {
-        log.warn("Обновление данных авторизованного пользователя.");
+        log.warn("Updating the authorized user's data.");
         userRepository.save(
                 userMapper.map(updateUser, this.getCurrentUser())
         );
-        log.info("Данные авторизованного пользователя успешно обновлены.");
+        log.info("The authorized user's data has been successfully updated.");
         return updateUser;
     }
 
     public void addUser(Register register) {
         UserEntity user = userMapper.map(register);
-        log.warn("Сохранение нового пользователя в базе данных.");
+        log.warn("Saving a new user in the database.");
         userRepository.save(user);
-        log.info("Пользователь успешно сохранён.");
+        log.info("The user has been saved successfully.");
     }
 
-    public Image updateUserImage(MultipartFile file) {
-        log.warn("Обновление аватара текущего пользователя.");
+    @Transactional
+    public Image updateOrCreateUserImage(MultipartFile file) {
+        log.warn("Updating the current user's avatar.");
         UserEntity user = this.getCurrentUser();
-        Image userImage = imageService.saveImage(file, user.getId());
-        userRepository.save(user.setImage(userImage));
-        log.info("Аватар успешно обновлён.");
-        return userImage;
+        Image userImage =
+                user.getImage() == null ?
+                        imageService.saveImage(file) :
+                        imageService.updateImage(file, user.getImage().getId());
+
+        UserEntity updatedUser = userRepository.save(user.setImage(userImage));
+        log.info("Avatar has been successfully updated.");
+        return updatedUser.getImage();
     }
 
     public boolean userExists(String username) {
         boolean isExists = userRepository.existsByUsername(username);
-        log.debug("Проверка существования текущего пользоввателя, результат: '{}'", isExists);
+        log.debug("Checking the existence of the current user, the result: '{}'", isExists);
         return isExists;
     }
 
@@ -87,7 +93,7 @@ public class UserService {
 
     private void checkPassword(String password, String actualPassword) {
         if (!encoder.matches(password, actualPassword)) {
-            log.error("Пароль для изменения в запросе не совпадает с паролем текущего пользователя!");
+            log.error("The password to change in the request does not match the password of the current user.!");
             throw new PasswordDoesNotMatchException();
         }
     }

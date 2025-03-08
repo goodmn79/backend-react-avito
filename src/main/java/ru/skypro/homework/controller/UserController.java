@@ -11,7 +11,6 @@ import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
-import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
@@ -22,7 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Slf4j
-@CrossOrigin(value = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -36,7 +35,7 @@ public class UserController {
     public void setPassword(@RequestBody NewPassword newPassword,
                             HttpServletResponse response,
                             HttpServletRequest request) {
-        log.info("Вызван метод 'setPassword'");
+        log.info("Invoke method 'setPassword'");
         userService.updatePassword(newPassword);
         authService.clearSecurityContext(response, request);
     }
@@ -44,14 +43,14 @@ public class UserController {
     @Operation(summary = "Получение информации об авторизованном пользователе")
     @GetMapping("/me")
     public User getUser() {
-        log.info("Вызван метод 'getUser'");
+        log.info("Invoke method 'getUser'");
         return userService.getUser();
     }
 
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
-        log.info("Вызван метод 'updateUser'");
+        log.info("Invoke method 'updateUser'");
         return userService.updateUser(updateUser);
     }
 
@@ -59,17 +58,18 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestParam("image") MultipartFile image, HttpServletResponse response) {
-        log.info("Вызван метод 'updateUserImage'");
-        Image userImage = userService.updateUserImage(image);
+    public void updateUserImage(@RequestBody MultipartFile image, HttpServletResponse response) {
+        log.info("Invoke method 'updateUserImage'");
+        Image userImage = userService.updateOrCreateUserImage(image);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(userImage.getMediaType());
         response.setContentLength(userImage.getSize());
+        Path path = Path.of(userImage.getPath());
+        log.info("Image path: {}", path);
         try (OutputStream out = response.getOutputStream()) {
-            Files.copy(Path.of(userImage.getPath()), out);
+            Files.copy(path, out);
         } catch (Exception e) {
-            log.error("{}. Ошибка загрузки изображения!", e.getMessage());
-            throw new UnsuccessfulImageSavingException();
+            log.error("{}. Image upload error!", e.getMessage());
         }
     }
 }

@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 public class UserDetailServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findByUsername(username)
