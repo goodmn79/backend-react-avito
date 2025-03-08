@@ -11,7 +11,6 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.service.AuthService;
-import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 public class AuthServiceImpl implements AuthService {
     private final UserDetailServiceImpl userDetailService;
     private final PasswordEncoder encoder;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     private final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
@@ -29,7 +28,7 @@ public class AuthServiceImpl implements AuthService {
     public boolean login(String username, String password) {
         log.warn("User authentication...");
 
-        if (userService.userExists(username)) {
+        if (userServiceImpl.userExists(username)) {
             UserDetails user = userDetailService.loadUserByUsername(username);
             log.info("The user has been found.");
 
@@ -46,11 +45,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean register(Register register) {
         log.info("Registering a new user...");
-        if (userService.userExists(register.getUsername())) {
+        if (userServiceImpl.userExists(register.getUsername())) {
             log.error("The user already exists!");
             return false;
         }
-        userService.addUser(register);
+        userServiceImpl.addUser(register);
         log.info("User registration completed successfully.");
         return true;
     }

@@ -1,4 +1,4 @@
-package ru.skypro.homework.service;
+package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import java.nio.file.StandardOpenOption;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ImageService {
+public class ImageServiceImpl {
     @Value("${application.images.directory}")
     private String imageDir;
 

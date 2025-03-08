@@ -13,7 +13,7 @@ import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
-import ru.skypro.homework.service.AdService;
+import ru.skypro.homework.service.impl.AdServiceImpl;
 
 @Slf4j
 @CrossOrigin(origins = "http://localhost:3000")
@@ -22,13 +22,13 @@ import ru.skypro.homework.service.AdService;
 @RequiredArgsConstructor
 @Tag(name = "Объявления")
 public class AdController {
-    private final AdService adService;
+    private final AdServiceImpl adServiceImpl;
 
     @Operation(summary = "Получение всех объявлений")
     @GetMapping
     public Ads getAllAds() {
         log.info("Invoke method 'getAllAds'");
-        return adService.getAllAds();
+        return adServiceImpl.getAllAds();
     }
 
     @Operation(summary = "Добавление объявления")
@@ -37,7 +37,7 @@ public class AdController {
     public Ad addAd(@RequestPart("properties") CreateOrUpdateAd createOrUpdateAd,
                     @RequestPart("image") MultipartFile image) {
         log.info("Invoke method 'addAd'");
-        return adService.addAd(createOrUpdateAd, image);
+        return adServiceImpl.addAd(createOrUpdateAd, image);
     }
 
     @Operation(summary = "Получение информации об объявлении")
@@ -45,15 +45,15 @@ public class AdController {
     @PreAuthorize("isAuthenticated()")
     public ExtendedAd getExtendedAd(@PathVariable("id") int id) {
         log.info("Invoke method 'getExtendedAd'");
-        return adService.getAdById(id);
+        return adServiceImpl.getAdById(id);
     }
 
     @Operation(summary = "Удаление объявления")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or @adService.isAdAuthor(#id, authentication.principal.username)")
+    @PreAuthorize("hasAuthority('ADMIN') or @adServiceImpl.isAdAuthor(#id, authentication.principal.username)")
     public void removeAd(@PathVariable("id") int id) {
         log.info("Invoke method 'removeAd'");
-        adService.removeAdById(id);
+        adServiceImpl.removeAdById(id);
     }
 
     @Operation(summary = "Обновление информации об объявлении")
@@ -62,7 +62,7 @@ public class AdController {
     public Ad updateAds(@PathVariable("id") int id,
                         @RequestBody CreateOrUpdateAd createOrUpdateAd) {
         log.info("Invoke method 'updateAds'");
-        return adService.updateAdById(id, createOrUpdateAd);
+        return adServiceImpl.updateAdById(id, createOrUpdateAd);
     }
 
     @Operation(summary = "Получение объявлений авторизованного пользователя")
@@ -70,7 +70,7 @@ public class AdController {
     @PreAuthorize("isAuthenticated()")
     public Ads getAdsMe() {
         log.info("Invoke method 'getAdsMe'");
-        return adService.getAds();
+        return adServiceImpl.getAds();
     }
 
     @Operation(summary = "Обновление картинки объявления",
@@ -81,6 +81,6 @@ public class AdController {
     public byte[] updateImage(@PathVariable("id") int id,
                               @RequestParam("image") MultipartFile image) {
         log.info("Invoke method 'updateImage'");
-        return adService.updateImage(id, image);
+        return adServiceImpl.updateImage(id, image);
     }
 }

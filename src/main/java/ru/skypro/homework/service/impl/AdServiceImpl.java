@@ -1,4 +1,4 @@
-package ru.skypro.homework.service;
+package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -22,13 +22,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AdService {
+public class AdServiceImpl {
     private final AdRepository adRepository;
     private final AdMapper adMapper;
-    private final ImageService imageService;
-    private final UserService userService;
+    private final ImageServiceImpl imageServiceImpl;
+    private final UserServiceImpl userServiceImpl;
 
-    private final Logger log = LoggerFactory.getLogger(AdService.class);
+    private final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
 
     public Ads getAllAds() {
         log.info("Getting all ads...");
@@ -45,7 +45,7 @@ public class AdService {
         AdEntity entity = adMapper.map(createOrUpdateAd);
 
         entity
-                .setAuthor(userService.getCurrentUser())
+                .setAuthor(userServiceImpl.getCurrentUser())
                 .setImage(this.getAdImage(entity.getPk(), image));
 
         log.debug("Saving an ad in a database.");
@@ -71,7 +71,7 @@ public class AdService {
         AdEntity entity = this.getAdEntity(pk);
         int imageId = entity.getImage().getId();
 
-        imageService.removeImage(imageId);
+        imageServiceImpl.removeImage(imageId);
         adRepository.deleteById(entity.getPk());
         log.info("The ad was successfully deleted.");
     }
@@ -109,7 +109,7 @@ public class AdService {
 
     public Ads getAds() {
         log.info("A request to receive ads from an authorized user.");
-        UserEntity currentUser = userService.getCurrentUser();
+        UserEntity currentUser = userServiceImpl.getCurrentUser();
 
         List<AdEntity> userAds = adRepository.findByAuthor(currentUser);
         Ads adsMe = adMapper.map(userAds);
@@ -135,7 +135,7 @@ public class AdService {
     private Image getAdImage(int pk, MultipartFile image) {
         AdEntity adEntity = this.getAdEntity(pk);
         return adEntity.getImage() == null ?
-                imageService.saveImage(image) :
-                imageService.updateImage(image, adEntity.getImage().getId());
+                imageServiceImpl.saveImage(image) :
+                imageServiceImpl.updateImage(image, adEntity.getImage().getId());
     }
 }

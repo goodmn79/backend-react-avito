@@ -7,7 +7,7 @@ import ru.skypro.homework.dto.comment.Comment;
 import ru.skypro.homework.dto.comment.Comments;
 import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
 import ru.skypro.homework.entity.CommentEntity;
-import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class CommentMapper {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     public Comment map(CommentEntity commentEntity) {
         String imagePath = commentEntity.getAuthor().getImage() == null ? null : commentEntity.getAuthor().getImage().getPath();
@@ -30,7 +30,7 @@ public class CommentMapper {
 
     public CommentEntity map(CreateOrUpdateComment comment) {
         return new CommentEntity()
-                .setAuthor(userService.getCurrentUser())
+                .setAuthor(userServiceImpl.getCurrentUser())
                 .setCratedAt(System.currentTimeMillis())
                 .setText(DataValidator.validatedData(comment.getText(), 8, 64));
     }

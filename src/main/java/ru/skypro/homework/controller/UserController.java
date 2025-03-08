@@ -12,7 +12,7 @@ import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.service.AuthService;
-import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +27,7 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 @Tag(name = "Пользователи")
 public class UserController {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
     private final AuthService authService;
 
     @Operation(summary = "Обновление пароля")
@@ -36,7 +36,7 @@ public class UserController {
                             HttpServletResponse response,
                             HttpServletRequest request) {
         log.info("Invoke method 'setPassword'");
-        userService.updatePassword(newPassword);
+        userServiceImpl.updatePassword(newPassword);
         authService.clearSecurityContext(response, request);
     }
 
@@ -44,14 +44,14 @@ public class UserController {
     @GetMapping("/me")
     public User getUser() {
         log.info("Invoke method 'getUser'");
-        return userService.getUser();
+        return userServiceImpl.getUser();
     }
 
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
         log.info("Invoke method 'updateUser'");
-        return userService.updateUser(updateUser);
+        return userServiceImpl.updateUser(updateUser);
     }
 
     @Operation(summary = "Обновление аватара авторизованного пользователя",
@@ -60,7 +60,7 @@ public class UserController {
     @PatchMapping("/me/image")
     public void updateUserImage(@RequestBody MultipartFile image, HttpServletResponse response) {
         log.info("Invoke method 'updateUserImage'");
-        Image userImage = userService.updateOrCreateUserImage(image);
+        Image userImage = userServiceImpl.updateOrCreateUserImage(image);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(userImage.getMediaType());
         response.setContentLength(userImage.getSize());

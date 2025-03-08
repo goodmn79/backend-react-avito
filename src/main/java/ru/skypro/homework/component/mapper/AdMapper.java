@@ -8,7 +8,7 @@ import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
-import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class AdMapper {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     public AdEntity map(CreateOrUpdateAd createOrUpdateAd) {
         return new AdEntity()
                 .setPrice(DataValidator.validatedPrice(createOrUpdateAd.getPrice()))
                 .setTitle(DataValidator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
                 .setDescription(DataValidator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
-                .setAuthor(userService.getCurrentUser());
+                .setAuthor(userServiceImpl.getCurrentUser());
     }
 
     public ExtendedAd map(AdEntity adEntity) {

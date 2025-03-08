@@ -1,4 +1,4 @@
-package ru.skypro.homework.service;
+package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -22,13 +22,13 @@ import ru.skypro.homework.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl {
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
-    private final ImageService imageService;
+    private final ImageServiceImpl imageServiceImpl;
 
-    private final Logger log = LoggerFactory.getLogger(UserService.class);
+    private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public void updatePassword(NewPassword newPassword) {
         UserEntity currentUser = this.getCurrentUser();
@@ -71,8 +71,8 @@ public class UserService {
         UserEntity user = this.getCurrentUser();
         Image userImage =
                 user.getImage() == null ?
-                        imageService.saveImage(file) :
-                        imageService.updateImage(file, user.getImage().getId());
+                        imageServiceImpl.saveImage(file) :
+                        imageServiceImpl.updateImage(file, user.getImage().getId());
 
         UserEntity updatedUser = userRepository.save(user.setImage(userImage));
         log.info("Avatar has been successfully updated.");

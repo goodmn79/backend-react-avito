@@ -1,4 +1,4 @@
-package ru.skypro.homework.service;
+package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -17,12 +17,12 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class CommentService {
+public class CommentServiceImpl {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
-    private final AdService adService;
+    private final AdServiceImpl adServiceImpl;
 
-    private final Logger log = LoggerFactory.getLogger(CommentService.class);
+    private final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
 
     public Comments getAdComments(int id) {
@@ -34,7 +34,7 @@ public class CommentService {
     public Comment addComment(int id, CreateOrUpdateComment comment) {
         log.info("Добавление комментария.");
 
-        AdEntity ad = adService.getAdEntity(id);
+        AdEntity ad = adServiceImpl.getAdEntity(id);
 
         CommentEntity entity =
                 commentMapper.map(comment).setAd(ad);
