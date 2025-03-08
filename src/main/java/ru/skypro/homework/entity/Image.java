@@ -5,6 +5,9 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
+/**
+ * Сущность, представляющая изображение.
+ */
 @Entity
 @Table(name = "images")
 @Data

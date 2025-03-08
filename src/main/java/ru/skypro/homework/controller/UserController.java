@@ -10,17 +10,22 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
-import ru.skypro.homework.entity.Image;
-import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.IOException;
 
+/**
+ * Контроллер для работы с пользователями.
+ * <p>
+ * Обрабатывает HTTP-запросы для получения и обновления информации о пользователе.
+ * </p>
+ *
+ * @author Powered by ©AYE.team
+ * @version 0.0.1-SNAPSHOT
+ */
 @Slf4j
 @RestController
 @RequestMapping("/users")
@@ -30,6 +35,14 @@ public class UserController {
     private final UserService userService;
     private final AuthService authService;
 
+    /**
+     * Обновление пароля пользователя.
+     * <br>Endpoint: POST /users/set_password
+     *
+     * @param newPassword объект с новым паролем
+     * @param response объект {@link HttpServletResponse}
+     * @param request объект {@link HttpServletRequest}
+     */
     @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
     public void setPassword(@RequestBody NewPassword newPassword,
@@ -40,6 +53,12 @@ public class UserController {
         authService.clearSecurityContext(response, request);
     }
 
+    /**
+     * Получение информации об авторизованном пользователе.
+     * <br>Endpoint: GET /users/me
+     *
+     * @return объект {@link User} с информацией о пользователе
+     */
     @Operation(summary = "Получение информации об авторизованном пользователе")
     @GetMapping("/me")
     public User getUser() {
@@ -47,6 +66,13 @@ public class UserController {
         return userService.getUser();
     }
 
+    /**
+     * Обновление информации об авторизованном пользователе.
+     * <br>Endpoint: PATCH /users/me
+     *
+     * @param updateUser объект с обновленной информацией о пользователе
+     * @return обновленный объект {@link User}
+     */
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
@@ -54,22 +80,19 @@ public class UserController {
         return userService.updateUser(updateUser);
     }
 
+    /**
+     * Обновление аватара авторизованного пользователя.
+     * <br>Endpoint: PATCH /users/me/image
+     *
+     * @param image файл изображения
+     */
     @Operation(summary = "Обновление аватара авторизованного пользователя",
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestParam("image") MultipartFile image, HttpServletResponse response) {
+    public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
         log.info("Вызван метод 'updateUserImage'");
-        Image userImage = userService.updateUserImage(image);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType(userImage.getMediaType());
-        response.setContentLength(userImage.getSize());
-        try (OutputStream out = response.getOutputStream()) {
-            Files.copy(Path.of(userImage.getPath()), out);
-        } catch (Exception e) {
-            log.error("{}. Ошибка загрузки изображения!", e.getMessage());
-            throw new UnsuccessfulImageSavingException();
-        }
+        userService.updateUserImage(image);
     }
 }
 

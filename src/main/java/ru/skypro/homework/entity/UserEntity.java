@@ -7,6 +7,9 @@ import ru.skypro.homework.enums.Role;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Сущность, представляющая пользователя.
+ */
 @Entity
 @Table(name = "users")
 @Data
