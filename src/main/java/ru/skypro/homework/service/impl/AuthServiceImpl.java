@@ -1,8 +1,7 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,14 +21,13 @@ import javax.servlet.http.HttpServletResponse;
  * @author Powered by ©AYE.team
  * @version 0.0.1-SNAPSHOT
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserDetailServiceImpl userDetailService;
     private final PasswordEncoder encoder;
-    private final UserServiceImpl userServiceImpl;
-
-    private final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
+    private final UserServiceImpl userService;
 
     /**
      * Выполнение процесса входа в систему.
@@ -42,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
     public boolean login(String username, String password) {
         log.warn("User authentication...");
 
-        if (userServiceImpl.userExists(username)) {
+        if (userService.userExists(username)) {
             UserDetails user = userDetailService.loadUserByUsername(username);
             log.info("The user has been found.");
 
@@ -65,11 +63,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean register(Register register) {
         log.info("Registering a new user...");
-        if (userServiceImpl.userExists(register.getUsername())) {
+        if (userService.userExists(register.getUsername())) {
             log.error("The user already exists!");
             return false;
         }
-        userServiceImpl.addUser(register);
+        userService.addUser(register);
         log.info("User registration completed successfully.");
         return true;
     }

@@ -8,8 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.enums.ImageExtension;
+import ru.skypro.homework.exception.ErrorImageProcessingException;
 import ru.skypro.homework.exception.ImageNotFoundException;
-import ru.skypro.homework.exception.UnsuccessImageProcessingException;
 import ru.skypro.homework.repository.ImageRepository;
 import ru.skypro.homework.service.ImageService;
 
@@ -39,7 +39,7 @@ public class ImageServiceImpl implements ImageService {
      *
      * @param file файл с изображением
      * @return {@link Image} новое или обновленное изображение
-     * @throws UnsuccessImageProcessingException Если не удалось сохранение
+     * @throws ErrorImageProcessingException Если не удалось сохранение
      */
     @Override
     public Image saveImage(MultipartFile file) {
@@ -53,7 +53,7 @@ public class ImageServiceImpl implements ImageService {
                     .setData(file.getBytes());
         } catch (IOException e) {
             log.error("{}. Error saving the image, the file is corrupted or unsupported!", e.getMessage());
-            throw new UnsuccessImageProcessingException();
+            throw new ErrorImageProcessingException();
         }
         this.saveToDir(image);
         Image savedImage = imageRepository.save(image);
@@ -67,7 +67,7 @@ public class ImageServiceImpl implements ImageService {
      * @param file файл с изображением
      * @param id   идентификатор изображения
      * @return {@link Image} новое или обновленное изображение
-     * @throws UnsuccessImageProcessingException Если не удалось сохранение
+     * @throws ErrorImageProcessingException Если не удалось сохранение
      */
     @Override
     public Image updateImage(MultipartFile file, int id) {
@@ -81,7 +81,7 @@ public class ImageServiceImpl implements ImageService {
                     .setData(file.getBytes());
         } catch (IOException e) {
             log.error("{}. Error updating the image, the file is corrupted or unsupported!", e.getMessage());
-            throw new UnsuccessImageProcessingException();
+            throw new ErrorImageProcessingException();
         }
 
         this.saveToDir(image);
@@ -109,16 +109,16 @@ public class ImageServiceImpl implements ImageService {
             log.info("Image successful removed!");
         } catch (Exception e) {
             log.error("Image not found!");
-            throw new UnsuccessImageProcessingException();
+            throw new ErrorImageProcessingException();
         }
     }
 
-    /**
-     * Сохранение пути файла изображения.
-     *
-     * @param image данные изображения
-     * @throws UnsuccessImageProcessingException Если не удалось сохранение
-     */
+    private String buildFilePath(MultipartFile file) {
+        log.debug("Invoke method 'buildFilePath'");
+        String fileName = DataValidator.validatedImage(file);
+        return imageDir + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
+    }
+
     private void saveToDir(Image image) {
         log.debug("Invoke method 'saveToDir'");
         String path = image.getPath();
@@ -138,20 +138,7 @@ public class ImageServiceImpl implements ImageService {
             );
         } catch (Exception e) {
             log.error("Error saving the image to path: '{}'", path);
-            throw new UnsuccessImageProcessingException();
+            throw new ErrorImageProcessingException();
         }
-    }
-
-    /**
-     * Создание имени изображения.
-     *
-     * @param file файл изображения
-     * @return Строка с именем изображения
-     */
-    @Override
-    public String buildFilePath(MultipartFile file) {
-        log.debug("Invoke method 'buildFilePath'");
-        String fileName = DataValidator.validatedImage(file);
-        return imageDir + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
     }
 }

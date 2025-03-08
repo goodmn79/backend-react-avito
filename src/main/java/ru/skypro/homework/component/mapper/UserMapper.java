@@ -4,13 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.component.validation.DataValidator;
-import ru.skypro.homework.dto.comment.Comment;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
-import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
-
 
 /**
  * Маппер для преобразования пользователя между DTO и сущностями.
@@ -82,12 +79,6 @@ public class UserMapper {
                 .setRole(register.getRole());
     }
 
-    /**
-     * Возвращает путь к аватару пользователя.
-     *
-     * @param user Сущность пользователя
-     * @return Строка с путем к аватару пользователя, либо {@code null}, если изображение отсутствует
-     */
     private String getUserImage(UserEntity user) {
         try {
             return user.getImage().getPath();

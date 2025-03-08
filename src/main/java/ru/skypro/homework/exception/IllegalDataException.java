@@ -17,9 +17,9 @@ public class IllegalDataException extends RuntimeException {
 
     /**
      * Конструктор исключения {@link IllegalDataException}.
-     * <br>Создаёт новое исключение с сообщением.
+     * <br>Создаёт новое исключение без сообщения.
      */
-    public IllegalDataException(String message) {
-        super(message);
+    public IllegalDataException() {
+
     }
 }

@@ -1,8 +1,7 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +29,7 @@ import java.util.List;
  * @author Powered by ©AYE.team
  * @version 0.0.1-SNAPSHOT
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdServiceImpl implements AdService {
@@ -37,8 +37,6 @@ public class AdServiceImpl implements AdService {
     private final AdMapper adMapper;
     private final ImageService imageService;
     private final UserService userService;
-
-    private final Logger log = LoggerFactory.getLogger(AdServiceImpl.class);
 
     /**
      * Получение всех объявлений.
@@ -58,10 +56,9 @@ public class AdServiceImpl implements AdService {
     /**
      * Добавление объявления.
      *
-     * @param jsonString строка с информацией объявления
-     * @param image      файл с изображением объявления
+     * @param createOrUpdateAd данные для создания объявления
+     * @param image            файл с изображением объявления
      * @return объект {@link Ad} созданное объявление
-     * @throws IOException Если произошла ошибка при обработке изображения
      */
     @Override
     @Transactional
@@ -70,7 +67,7 @@ public class AdServiceImpl implements AdService {
         AdEntity entity = adMapper.map(createOrUpdateAd);
 
         entity
-                .setAuthor(userServiceImpl.getCurrentUser())
+                .setAuthor(userService.getCurrentUser())
                 .setImage(this.getAdImage(entity.getPk(), image));
 
         log.debug("Saving an ad in a database.");
@@ -169,7 +166,7 @@ public class AdServiceImpl implements AdService {
     @Override
     public Ads getAds() {
         log.info("A request to receive ads from an authorized user.");
-        UserEntity currentUser = userServiceImpl.getCurrentUser();
+        UserEntity currentUser = userService.getCurrentUser();
 
         List<AdEntity> userAds = adRepository.findByAuthor(currentUser);
         Ads adsMe = adMapper.map(userAds);
@@ -208,7 +205,7 @@ public class AdServiceImpl implements AdService {
     private Image getAdImage(int pk, MultipartFile image) {
         AdEntity adEntity = this.getAdEntity(pk);
         return adEntity.getImage() == null ?
-                imageServiceImpl.saveImage(image) :
-                imageServiceImpl.updateImage(image, adEntity.getImage().getId());
+                imageService.saveImage(image) :
+                imageService.updateImage(image, adEntity.getImage().getId());
     }
 }

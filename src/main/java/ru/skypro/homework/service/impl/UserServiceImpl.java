@@ -1,8 +1,7 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,8 +21,6 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
-import java.io.IOException;
-
 /**
  * Реализация сервиса для работы с пользователем.
  * <br> Этот класс реализует интерфейс {@link UserService}
@@ -31,15 +28,14 @@ import java.io.IOException;
  * @author Powered by ©AYE.team
  * @version 0.0.1-SNAPSHOT
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl {
+public class UserServiceImpl implements UserService {
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final ImageService imageService;
-
-    private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     /**
      * Обновление пароля пользователя.
@@ -147,13 +143,6 @@ public class UserServiceImpl {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    /**
-     * Проверка подтверждения пароля.
-     *
-     * @param password       пароль пользователя
-     * @param actualPassword подтверждение пароля
-     * @throws PasswordDoesNotMatchException Если пароли не совпадают
-     */
     private void checkPassword(String password, String actualPassword) {
         if (!encoder.matches(password, actualPassword)) {
             log.error("The password to change in the request does not match the password of the current user.!");

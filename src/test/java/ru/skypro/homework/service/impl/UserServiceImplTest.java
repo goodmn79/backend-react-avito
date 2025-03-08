@@ -20,7 +20,7 @@ import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.PasswordDoesNotMatchException;
-import ru.skypro.homework.exception.UnsuccessImageProcessingException;
+import ru.skypro.homework.exception.ErrorImageProcessingException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.repository.UserRepository;
 
@@ -263,10 +263,10 @@ class UserServiceImplTest {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
             when(imageServiceImpl.updateImage(any(MultipartFile.class), anyInt()))
-                    .thenThrow(UnsuccessImageProcessingException.class);
+                    .thenThrow(ErrorImageProcessingException.class);
 
             assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
-                    .isInstanceOf(UnsuccessImageProcessingException.class);
+                    .isInstanceOf(ErrorImageProcessingException.class);
         }
 
         @Test
@@ -275,10 +275,10 @@ class UserServiceImplTest {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
             when(imageServiceImpl.saveImage(any(MultipartFile.class)))
-                    .thenThrow(UnsuccessImageProcessingException.class);
+                    .thenThrow(ErrorImageProcessingException.class);
 
             assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
-                    .isInstanceOf(UnsuccessImageProcessingException.class);
+                    .isInstanceOf(ErrorImageProcessingException.class);
         }
 
         @Test

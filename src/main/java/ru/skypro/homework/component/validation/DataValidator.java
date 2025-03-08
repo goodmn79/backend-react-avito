@@ -1,7 +1,6 @@
 package ru.skypro.homework.component.validation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.IllegalDataException;
 import ru.skypro.homework.exception.WrongFileFormatException;
@@ -15,8 +14,8 @@ import java.util.regex.Pattern;
  * @author Powered by ©AYE.team
  * @version 0.0.1-SNAPSHOT
  */
+@Slf4j
 public abstract class DataValidator {
-    private static final Logger log = LoggerFactory.getLogger(DataValidator.class);
 
     /**
      * Проверяет, что строка имеет допустимую длину.
@@ -30,7 +29,7 @@ public abstract class DataValidator {
     public static String validatedData(String input, int minLength, int maxLength) {
         if (input.length() < minLength || input.length() > maxLength) {
             log.error("Длина строки не может содержать менее {} и более {} символов.", minLength, maxLength);
-            throw new IllegalDataException("Длина строки должна быть от " + minLength + " до " + maxLength + " символов.");
+            throw new IllegalDataException();
         }
         return input;
     }
@@ -61,7 +60,7 @@ public abstract class DataValidator {
     public static int validatedPrice(int price) {
         if (price < 0 || price > 10_000_000) {
             log.error("Цена не может быть менее {} и более {}.", 0, 10_000_000);
-            throw new IllegalDataException("Цена должна быть от 0 до 10 000 000.");
+            throw new IllegalDataException();
         }
         return price;
     }
@@ -79,7 +78,7 @@ public abstract class DataValidator {
         Matcher matcher = compiledPattern.matcher(phone);
         if (!matcher.matches()) {
             log.error("Номер телефона не соответствует формату +7 (XXX) XXX-XX-XX.");
-            throw new IllegalDataException("Номер телефона должен соответствовать формату: +7 (XXX) XXX-XX-XX");
+            throw new IllegalDataException();
         }
         return phone;
     }

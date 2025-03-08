@@ -49,12 +49,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
         );
     }
 
-    /**
-     * Преобразование ролей пользователя в список авторитетов.
-     *
-     * @param role Роль пользователя, которая будет преобразована в {@link GrantedAuthority}
-     * @return коллекция авторитетов ({@link GrantedAuthority}), ассоциированных с ролью пользователя
-     */
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Role role) {
         return Stream.of(role.name())
                 .map(SimpleGrantedAuthority::new)

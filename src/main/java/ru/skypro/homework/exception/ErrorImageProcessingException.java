@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * @version 0.0.1-SNAPSHOT
  */
 @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-public class UnsuccessImageProcessingException extends RuntimeException {
+public class ErrorImageProcessingException extends RuntimeException {
     /**
-     * Конструктор исключения {@link UnsuccessImageProcessingException}.
+     * Конструктор исключения {@link ErrorImageProcessingException}.
      * <br>Создаёт новое исключение без сообщения.
      */
-    public UnsuccessImageProcessingException() {
+    public ErrorImageProcessingException() {
     }
 }

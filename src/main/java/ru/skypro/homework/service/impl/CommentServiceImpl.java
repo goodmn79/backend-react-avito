@@ -1,8 +1,7 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.component.mapper.CommentMapper;
 import ru.skypro.homework.dto.comment.Comment;
@@ -24,14 +23,13 @@ import java.util.List;
  * @author Powered by ©AYE.team
  * @version 0.0.1-SNAPSHOT
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final AdService adService;
-
-    private final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
     /**
      * Получение комментариев объявления.
@@ -105,6 +103,27 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
+     * Проверка текущего пользователя на авторство комментария.
+     *
+     * @return {@code true}, если текущий пользователь является автором комментария, иначе {@code false}
+     */
+    @Override
+    public boolean isCommentAuthor(int adId, int commentId, String currentUsername) {
+        String commentAuthorName = this.getCommentByAdId(adId, commentId).getAuthor().getUsername();
+
+        log.warn("Проверка соответствия имени автора комментария: '{}' и имени текущего пользователя: '{}'.", commentAuthorName, currentUsername);
+
+        boolean isAuthor = commentAuthorName.equals(currentUsername);
+
+        if (isAuthor) {
+            log.info("Доступ к изменению/удалению комментария разрешён.");
+        } else {
+            log.error("Доступ к изменению/удалению комментария запрещён!");
+        }
+        return isAuthor;
+    }
+
+    /**
      * Получение всех комментариев объявления.
      *
      * @param adId идентификатор объявления
@@ -127,26 +146,5 @@ public class CommentServiceImpl implements CommentService {
                 .stream()
                 .filter(c -> c.getPk() == commentId)
                 .findFirst().orElseThrow(CommentNotFoundException::new);
-    }
-
-    /**
-     * Проверка текущего пользователя на авторство комментария.
-     *
-     * @return {@code true}, если текущий пользователь является автором комментария, иначе {@code false}
-     */
-    @Override
-    public boolean isCommentAuthor(int adId, int commentId, String currentUsername) {
-        String commentAuthorName = this.getCommentByAdId(adId, commentId).getAuthor().getUsername();
-
-        log.warn("Проверка соответствия имени автора комментария: '{}' и имени текущего пользователя: '{}'.", commentAuthorName, currentUsername);
-
-        boolean isAuthor = commentAuthorName.equals(currentUsername);
-
-        if (isAuthor) {
-            log.info("Доступ к изменению/удалению комментария разрешён.");
-        } else {
-            log.error("Доступ к изменению/удалению комментария запрещён!");
-        }
-        return isAuthor;
     }
 }
