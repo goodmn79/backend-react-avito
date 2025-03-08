@@ -12,7 +12,7 @@ import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.service.AuthService;
-import ru.skypro.homework.service.impl.UserServiceImpl;
+import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,7 +36,7 @@ import java.nio.file.Path;
 @RequiredArgsConstructor
 @Tag(name = "Пользователи")
 public class UserController {
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
     private final AuthService authService;
 
     /**
@@ -44,8 +44,8 @@ public class UserController {
      * <br>Endpoint: POST /users/set_password
      *
      * @param newPassword объект с новым паролем
-     * @param response объект {@link HttpServletResponse}
-     * @param request объект {@link HttpServletRequest}
+     * @param response    объект {@link HttpServletResponse}
+     * @param request     объект {@link HttpServletRequest}
      */
     @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
@@ -53,7 +53,7 @@ public class UserController {
                             HttpServletResponse response,
                             HttpServletRequest request) {
         log.info("Invoke method 'setPassword'");
-        userServiceImpl.updatePassword(newPassword);
+        userService.updatePassword(newPassword);
         authService.clearSecurityContext(response, request);
     }
 
@@ -67,7 +67,7 @@ public class UserController {
     @GetMapping("/me")
     public User getUser() {
         log.info("Invoke method 'getUser'");
-        return userServiceImpl.getUser();
+        return userService.getUser();
     }
 
     /**
@@ -81,7 +81,7 @@ public class UserController {
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
         log.info("Invoke method 'updateUser'");
-        return userServiceImpl.updateUser(updateUser);
+        return userService.updateUser(updateUser);
     }
 
     /**
@@ -96,7 +96,7 @@ public class UserController {
     @PatchMapping("/me/image")
     public void updateUserImage(@RequestBody MultipartFile image, HttpServletResponse response) {
         log.info("Invoke method 'updateUserImage'");
-        Image userImage = userServiceImpl.updateOrCreateUserImage(image);
+        Image userImage = userService.updateOrCreateUserImage(image);
         response.setStatus(HttpServletResponse.SC_OK);
         response.setContentType(userImage.getMediaType());
         response.setContentLength(userImage.getSize());

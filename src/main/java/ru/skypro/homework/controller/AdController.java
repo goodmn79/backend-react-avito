@@ -13,7 +13,7 @@ import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
 import ru.skypro.homework.dto.ad.ExtendedAd;
-import ru.skypro.homework.service.impl.AdServiceImpl;
+import ru.skypro.homework.service.AdService;
 
 /**
  * Контроллер для управления объявлениями.
@@ -31,7 +31,7 @@ import ru.skypro.homework.service.impl.AdServiceImpl;
 @RequiredArgsConstructor
 @Tag(name = "Объявления")
 public class AdController {
-    private final AdServiceImpl adServiceImpl;
+    private final AdService adService;
 
     /**
      * Получение всех объявлений.
@@ -43,7 +43,7 @@ public class AdController {
     @GetMapping
     public Ads getAllAds() {
         log.info("Invoke method 'getAllAds'");
-        return adServiceImpl.getAllAds();
+        return adService.getAllAds();
     }
 
     /**
@@ -51,10 +51,9 @@ public class AdController {
      * <br> Доступ к методу имеет только аутентифицированный пользователь.
      * <br> Endpoint: POST /ads
      *
-     * @param jsonString строка с информацией объявления
-     * @param image файл с изображением объявления
+     * @param createOrUpdateAd данные для создания объявления
+     * @param image            файл с изображением объявления
      * @return объект {@link Ad} созданное объявление
-     * @throws IOException Если произошла ошибка при обработке изображения
      */
     @Operation(summary = "Добавление объявления")
     @PostMapping(consumes = "multipart/form-data", produces = "application/json")
@@ -62,7 +61,7 @@ public class AdController {
     public Ad addAd(@RequestPart("properties") CreateOrUpdateAd createOrUpdateAd,
                     @RequestPart("image") MultipartFile image) {
         log.info("Invoke method 'addAd'");
-        return adServiceImpl.addAd(createOrUpdateAd, image);
+        return adService.addAd(createOrUpdateAd, image);
     }
 
     /**
@@ -78,7 +77,7 @@ public class AdController {
     @PreAuthorize("isAuthenticated()")
     public ExtendedAd getExtendedAd(@PathVariable("id") int id) {
         log.info("Invoke method 'getExtendedAd'");
-        return adServiceImpl.getAdById(id);
+        return adService.getAdById(id);
     }
 
     /**
@@ -93,7 +92,7 @@ public class AdController {
     @PreAuthorize("hasAuthority('ADMIN') or @adServiceImpl.isAdAuthor(#id, authentication.principal.username)")
     public void removeAd(@PathVariable("id") int id) {
         log.info("Invoke method 'removeAd'");
-        adServiceImpl.removeAdById(id);
+        adService.removeAdById(id);
     }
 
     /**
@@ -101,7 +100,7 @@ public class AdController {
      * <br> Доступ к методу имеет только аутентифицированный пользователь.
      * <br> Endpoint: PATCH /ads/{id}
      *
-     * @param id идентификатор объявления
+     * @param id               идентификатор объявления
      * @param createOrUpdateAd информация для обновления объявления
      * @return объект {@link Ad} обновленное объявление
      */
@@ -111,7 +110,7 @@ public class AdController {
     public Ad updateAds(@PathVariable("id") int id,
                         @RequestBody CreateOrUpdateAd createOrUpdateAd) {
         log.info("Invoke method 'updateAds'");
-        return adServiceImpl.updateAdById(id, createOrUpdateAd);
+        return adService.updateAdById(id, createOrUpdateAd);
     }
 
     /**
@@ -126,7 +125,7 @@ public class AdController {
     @PreAuthorize("isAuthenticated()")
     public Ads getAdsMe() {
         log.info("Invoke method 'getAdsMe'");
-        return adServiceImpl.getAds();
+        return adService.getAds();
     }
 
     /**
@@ -134,10 +133,9 @@ public class AdController {
      * <br> Доступ к методу имеет только аутентифицированный пользователь.
      * <br> Endpoint: PATCH /ads/{id}/image
      *
-     * @param id идентификатор объявления
+     * @param id    идентификатор объявления
      * @param image файл с новой картинкой объявления
      * @return объект {@link byte[]} массив байтов, содержащий данные обновлённого изображения
-     * @throws IOException Если произошла ошибка при обработке изображения
      */
     @Operation(summary = "Обновление картинки объявления",
             responses = {@ApiResponse(description = "OK",
@@ -147,6 +145,6 @@ public class AdController {
     public byte[] updateImage(@PathVariable("id") int id,
                               @RequestParam("image") MultipartFile image) {
         log.info("Invoke method 'updateImage'");
-        return adServiceImpl.updateImage(id, image);
+        return adService.updateImage(id, image);
     }
 }

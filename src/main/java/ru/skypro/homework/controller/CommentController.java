@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.comment.Comment;
 import ru.skypro.homework.dto.comment.Comments;
 import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
-import ru.skypro.homework.service.impl.CommentServiceImpl;
+import ru.skypro.homework.service.CommentService;
 
 /**
  * Контроллер для управления комментариями.
@@ -27,7 +27,7 @@ import ru.skypro.homework.service.impl.CommentServiceImpl;
 @Tag(name = "Комментарии")
 @RequiredArgsConstructor
 public class CommentController {
-    private final CommentServiceImpl commentServiceImpl;
+    private final CommentService commentService;
 
     /**
      * Получение комментариев объявления.
@@ -40,7 +40,7 @@ public class CommentController {
     @GetMapping("/{id}/comments")
     public Comments getComments(@PathVariable int id) {
         log.info("Вызван метод 'getComments'");
-        return commentServiceImpl.getAdComments(id);
+        return commentService.getAdComments(id);
     }
 
     /**
@@ -55,7 +55,7 @@ public class CommentController {
     @PostMapping("/{id}/comments")
     public Comment addComment(@PathVariable int id, @RequestBody CreateOrUpdateComment comment) {
         log.info("Вызван метод 'addComment'");
-        return commentServiceImpl.addComment(id, comment);
+        return commentService.addComment(id, comment);
     }
 
     /**
@@ -72,7 +72,7 @@ public class CommentController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN') or @commentServiceImpl.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
     public void deleteComment(@PathVariable int adId, @PathVariable int commentId) {
         log.info("Вызван метод 'deleteComment'");
-        commentServiceImpl.deleteComment(adId, commentId);
+        commentService.deleteComment(adId, commentId);
     }
 
     /**
@@ -90,6 +90,6 @@ public class CommentController {
     @PreAuthorize("@commentServiceImpl.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
     public Comment updateComment(@PathVariable int adId, @PathVariable int commentId, @RequestBody CreateOrUpdateComment comment) {
         log.info("Вызван метод 'updateComment'");
-        return commentServiceImpl.updateComment(adId, commentId, comment);
+        return commentService.updateComment(adId, commentId, comment);
     }
 }
