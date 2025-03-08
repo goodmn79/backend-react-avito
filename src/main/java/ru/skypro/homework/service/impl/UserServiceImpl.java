@@ -21,8 +21,6 @@ import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
-import java.io.IOException;
-
 /**
  * Реализация сервиса для работы с пользователем.
  * <br> Этот класс реализует интерфейс {@link UserService}
@@ -106,7 +104,7 @@ public class UserServiceImpl implements UserService {
      * @param file файл нового аватара пользователя
      */
     @Override
-    public void updateUserImage(MultipartFile file) throws IOException {
+    public void updateUserImage(MultipartFile file) {
         log.warn("Обновление аватара текущего пользователя.");
         UserEntity user = this.getCurrentUser();
         Image userImage = imageService.saveImage(file, user.getId());

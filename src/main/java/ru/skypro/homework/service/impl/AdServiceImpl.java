@@ -17,7 +17,6 @@ import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.AdNotFoundException;
-import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.service.ImageService;
@@ -150,11 +149,10 @@ public class AdServiceImpl implements AdService {
      * @param pk    идентификатор объявления
      * @param image файл с новой картинкой объявления
      * @return объект {@link byte[]} массив байтов, содержащий данные обновлённого изображения.
-     * @throws IOException Если произошла ошибка при обработке изображения
      */
     @Override
     @Transactional
-    public byte[] updateImage(int pk, MultipartFile image) throws IOException {
+    public byte[] updateImage(int pk, MultipartFile image) {
         log.info("Изменение изображения объявления.");
 
         Image adImage = imageService.saveImage(image, pk);
