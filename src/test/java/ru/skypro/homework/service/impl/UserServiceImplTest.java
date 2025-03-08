@@ -1,4 +1,4 @@
-package ru.skypro.homework.service;
+package ru.skypro.homework.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -20,11 +20,10 @@ import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.PasswordDoesNotMatchException;
-import ru.skypro.homework.exception.UnsuccessfulImageSavingException;
+import ru.skypro.homework.exception.UnsuccessImageProcessingException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.repository.UserRepository;
 
-import java.io.IOException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceTest {
+class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
@@ -44,10 +43,10 @@ class UserServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private ImageService imageService;
+    private ImageServiceImpl imageServiceImpl;
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     private UserEntity testEntity;
 
@@ -70,7 +69,7 @@ class UserServiceTest {
         when(userMapper.map(register)).thenReturn(testEntity);
         when(userRepository.save(testEntity)).thenReturn(testEntity);
 
-        userService.addUser(register);
+        userServiceImpl.addUser(register);
 
         verify(userRepository, times(1)).save(testEntity);
         verify(userMapper, times(1)).map(register);
@@ -80,7 +79,7 @@ class UserServiceTest {
     void testUserExists_whenUserExist_shouldReturnTrue() {
         when(userRepository.existsByUsername(anyString())).thenReturn(true);
 
-        boolean actual = userService.userExists(testEntity.getUsername());
+        boolean actual = userServiceImpl.userExists(testEntity.getUsername());
 
         verify(userRepository, times(1))
                 .existsByUsername(testEntity.getUsername());
@@ -92,7 +91,7 @@ class UserServiceTest {
     void testUserExists_whenUserNotExist_shouldReturnFalse() {
         when(userRepository.existsByUsername(anyString())).thenReturn(false);
 
-        boolean actual = userService.userExists(testEntity.getUsername());
+        boolean actual = userServiceImpl.userExists(testEntity.getUsername());
 
         verify(userRepository, times(1))
                 .existsByUsername(testEntity.getUsername());
@@ -102,7 +101,7 @@ class UserServiceTest {
 
 
     @Nested
-    class UserServiceTestWithSecurityContext {
+    class UserServiceImplTestWithSecurityContext {
         @BeforeEach
         void setUp() {
             Authentication authentication = mock(Authentication.class);
@@ -124,7 +123,7 @@ class UserServiceTest {
             when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
             when(passwordEncoder.encode(newPassword.getNewPassword())).thenReturn("updatedPassword");
 
-            userService.updatePassword(newPassword);
+            userServiceImpl.updatePassword(newPassword);
 
             verify(userRepository, times(1)).findByUsername(testEntity.getUsername());
             verify(userRepository, times(1)).save(testEntity);
@@ -141,7 +140,7 @@ class UserServiceTest {
             when(userRepository.findByUsername("username")).thenReturn(Optional.of(testEntity));
             when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-            assertThatThrownBy(() -> userService.updatePassword(newPassword))
+            assertThatThrownBy(() -> userServiceImpl.updatePassword(newPassword))
                     .isInstanceOf(PasswordDoesNotMatchException.class);
 
             verify(userRepository, times(1)).findByUsername("username");
@@ -155,7 +154,7 @@ class UserServiceTest {
                             .setNewPassword("newPassword");
             when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> userService.updatePassword(newPassword))
+            assertThatThrownBy(() -> userServiceImpl.updatePassword(newPassword))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userRepository, times(1)).findByUsername("username");
@@ -167,7 +166,7 @@ class UserServiceTest {
             when(userRepository.findByUsername("username")).thenReturn(Optional.of(testEntity));
             when(userMapper.map(testEntity)).thenReturn(expected);
 
-            User actual = userService.getUser();
+            User actual = userServiceImpl.getUser();
 
             verify(userMapper).map(testEntity);
             verify(userRepository, times(1)).findByUsername("username");
@@ -180,7 +179,7 @@ class UserServiceTest {
         void testGetUser_whenUserEntityNotFound_shouldThrowException() {
             when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> userService.getUser())
+            assertThatThrownBy(() -> userServiceImpl.getUser())
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userRepository, times(1)).findByUsername("username");
@@ -194,7 +193,7 @@ class UserServiceTest {
             when(userMapper.map(expected, testEntity))
                     .thenReturn(testEntity);
 
-            UpdateUser actual = userService.updateUser(expected);
+            UpdateUser actual = userServiceImpl.updateUser(expected);
 
             verify(userMapper).map(expected, testEntity);
             verify(userRepository, times(1)).save(testEntity);
@@ -207,46 +206,79 @@ class UserServiceTest {
         void testUpdateUser_whenUserEntityNotFound_shouldThrowException() {
             when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> userService.updateUser(mock(UpdateUser.class)))
+            assertThatThrownBy(() -> userServiceImpl.updateUser(mock(UpdateUser.class)))
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userRepository, times(1)).findByUsername(anyString());
         }
 
         @Test
-        void testUpdateUserImage_shouldSaveImage() throws IOException {
+        void testUpdateOrCreateUserImage_whenImageSuccessSaved_shouldReturnSavedImage() {
             MultipartFile file = mock(MultipartFile.class);
-            Image image = mock(Image.class);
-            when(userRepository.findByUsername(testEntity.getUsername())).thenReturn(Optional.of(testEntity));
-            when(imageService.saveImage(file, testEntity.getId()))
-                    .thenReturn(image);
-            when(userRepository.save(testEntity)).thenReturn(testEntity);
+            testEntity.setImage(null);
+            when(userRepository.findByUsername(testEntity.getUsername()))
+                    .thenReturn(Optional.of(testEntity));
+            when(userRepository.save(testEntity))
+                    .thenReturn(testEntity);
 
-            userService.updateUserImage(file);
+            userServiceImpl.updateOrCreateUserImage(file);
 
-            verify(userRepository, times(1)).findByUsername(testEntity.getUsername());
-            verify(userRepository, times(1)).save(testEntity);
-            verify(imageService, times(1)).saveImage(file, testEntity.getId());
+            verify(userRepository, times(1))
+                    .findByUsername(testEntity.getUsername());
+            verify(userRepository, times(1))
+                    .save(testEntity);
+            verify(imageServiceImpl, times(1))
+                    .saveImage(any(MultipartFile.class));
         }
 
         @Test
-        void testUpdateUserImage_whenUserNotFound_shouldThrowException() {
+        void testUpdateOrCreateUserImage_whenImageSuccessUpdated_shouldReturnSavedImage() {
+            MultipartFile file = mock(MultipartFile.class);
+            when(userRepository.findByUsername(testEntity.getUsername()))
+                    .thenReturn(Optional.of(testEntity));
+            when(userRepository.save(testEntity))
+                    .thenReturn(testEntity);
+
+            userServiceImpl.updateOrCreateUserImage(file);
+
+            verify(userRepository, times(1))
+                    .findByUsername(testEntity.getUsername());
+            verify(userRepository, times(1))
+                    .save(testEntity);
+            verify(imageServiceImpl, times(1))
+                    .updateImage(any(MultipartFile.class), anyInt());
+        }
+
+        @Test
+        void testUpdateOrCreateUserImage_whenUserNotFound_shouldThrowException() {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> userService.updateUserImage(mock(MultipartFile.class)))
+            assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
                     .isInstanceOf(UserNotFoundException.class);
         }
 
         @Test
-        void testUpdateUserImage_whenUnsuccessfulImageSaving_shouldThrowException() throws IOException {
+        void testUpdateOrCreateUserImage_whenUnsuccessfulImageSavingByUpdating_shouldThrowException() {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
-            when(imageService.saveImage(any(MultipartFile.class), anyInt()))
-                    .thenThrow(UnsuccessfulImageSavingException.class);
+            when(imageServiceImpl.updateImage(any(MultipartFile.class), anyInt()))
+                    .thenThrow(UnsuccessImageProcessingException.class);
 
-            assertThatThrownBy(() -> userService.updateUserImage(mock(MultipartFile.class)))
-                    .isInstanceOf(UnsuccessfulImageSavingException.class);
+            assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
+                    .isInstanceOf(UnsuccessImageProcessingException.class);
+        }
+
+        @Test
+        void testUpdateOrCreateUserImage_whenUnsuccessfulImageSavingBySaving_shouldThrowException() {
+            testEntity.setImage(null);
+            when(userRepository.findByUsername(testEntity.getUsername()))
+                    .thenReturn(Optional.of(testEntity));
+            when(imageServiceImpl.saveImage(any(MultipartFile.class)))
+                    .thenThrow(UnsuccessImageProcessingException.class);
+
+            assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
+                    .isInstanceOf(UnsuccessImageProcessingException.class);
         }
 
         @Test
@@ -254,7 +286,7 @@ class UserServiceTest {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
 
-            UserEntity actual = userService.getCurrentUser();
+            UserEntity actual = userServiceImpl.getCurrentUser();
 
             verify(userRepository, times(1))
                     .findByUsername(testEntity.getUsername());
@@ -267,7 +299,7 @@ class UserServiceTest {
         void testGetCurrentUser_whenUserEntityNotFound_shouldThrowException() {
             when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> userService.getCurrentUser())
+            assertThatThrownBy(() -> userServiceImpl.getCurrentUser())
                     .isInstanceOf(UserNotFoundException.class);
 
             verify(userRepository, times(1)).findByUsername(anyString());

@@ -78,6 +78,7 @@ public class UserMapper {
                         DataValidator.validatedData(register.getLastName(), 2, 16))
                 .setPhone(
                         DataValidator.validatedPhoneNumber(register.getPhone()))
+                .setEmail(register.getUsername())
                 .setRole(register.getRole());
     }
 

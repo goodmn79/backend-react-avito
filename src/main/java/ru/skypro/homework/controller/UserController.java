@@ -10,12 +10,15 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
+import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.service.AuthService;
-import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 /**
  * Контроллер для работы с пользователями.
@@ -27,12 +30,13 @@ import java.io.IOException;
  * @version 0.0.1-SNAPSHOT
  */
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
 @Tag(name = "Пользователи")
 public class UserController {
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
     private final AuthService authService;
 
     /**
@@ -48,8 +52,8 @@ public class UserController {
     public void setPassword(@RequestBody NewPassword newPassword,
                             HttpServletResponse response,
                             HttpServletRequest request) {
-        log.info("Вызван метод 'setPassword'");
-        userService.updatePassword(newPassword);
+        log.info("Invoke method 'setPassword'");
+        userServiceImpl.updatePassword(newPassword);
         authService.clearSecurityContext(response, request);
     }
 
@@ -62,8 +66,8 @@ public class UserController {
     @Operation(summary = "Получение информации об авторизованном пользователе")
     @GetMapping("/me")
     public User getUser() {
-        log.info("Вызван метод 'getUser'");
-        return userService.getUser();
+        log.info("Invoke method 'getUser'");
+        return userServiceImpl.getUser();
     }
 
     /**
@@ -76,8 +80,8 @@ public class UserController {
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
-        log.info("Вызван метод 'updateUser'");
-        return userService.updateUser(updateUser);
+        log.info("Invoke method 'updateUser'");
+        return userServiceImpl.updateUser(updateUser);
     }
 
     /**
@@ -90,9 +94,19 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestParam("image") MultipartFile image) throws IOException {
-        log.info("Вызван метод 'updateUserImage'");
-        userService.updateUserImage(image);
+    public void updateUserImage(@RequestBody MultipartFile image, HttpServletResponse response) {
+        log.info("Invoke method 'updateUserImage'");
+        Image userImage = userServiceImpl.updateOrCreateUserImage(image);
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.setContentType(userImage.getMediaType());
+        response.setContentLength(userImage.getSize());
+        Path path = Path.of(userImage.getPath());
+        log.info("Image path: {}", path);
+        try (OutputStream out = response.getOutputStream()) {
+            Files.copy(path, out);
+        } catch (Exception e) {
+            log.error("{}. Image upload error!", e.getMessage());
+        }
     }
 }
 

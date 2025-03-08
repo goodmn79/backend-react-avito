@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.comment.Comment;
 import ru.skypro.homework.dto.comment.Comments;
 import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
-import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.impl.CommentServiceImpl;
 
 /**
  * Контроллер для управления комментариями.
@@ -21,12 +21,13 @@ import ru.skypro.homework.service.CommentService;
  * @version 0.0.1-SNAPSHOT
  */
 @Slf4j
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
 @Tag(name = "Комментарии")
 @RequiredArgsConstructor
 public class CommentController {
-    private final CommentService commentService;
+    private final CommentServiceImpl commentServiceImpl;
 
     /**
      * Получение комментариев объявления.
@@ -39,7 +40,7 @@ public class CommentController {
     @GetMapping("/{id}/comments")
     public Comments getComments(@PathVariable int id) {
         log.info("Вызван метод 'getComments'");
-        return commentService.getAdComments(id);
+        return commentServiceImpl.getAdComments(id);
     }
 
     /**
@@ -54,7 +55,7 @@ public class CommentController {
     @PostMapping("/{id}/comments")
     public Comment addComment(@PathVariable int id, @RequestBody CreateOrUpdateComment comment) {
         log.info("Вызван метод 'addComment'");
-        return commentService.addComment(id, comment);
+        return commentServiceImpl.addComment(id, comment);
     }
 
     /**
@@ -68,10 +69,10 @@ public class CommentController {
     @Operation(summary = "Удаление комментария",
             operationId = "deleteComment")
     @DeleteMapping("/{adId}/comments/{commentId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or @commentService.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or @commentServiceImpl.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
     public void deleteComment(@PathVariable int adId, @PathVariable int commentId) {
         log.info("Вызван метод 'deleteComment'");
-        commentService.deleteComment(adId, commentId);
+        commentServiceImpl.deleteComment(adId, commentId);
     }
 
     /**
@@ -86,9 +87,9 @@ public class CommentController {
      */
     @Operation(summary = "Обновление комментария")
     @PatchMapping("/{adId}/comments/{commentId}")
-    @PreAuthorize("@commentService.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
+    @PreAuthorize("@commentServiceImpl.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
     public Comment updateComment(@PathVariable int adId, @PathVariable int commentId, @RequestBody CreateOrUpdateComment comment) {
         log.info("Вызван метод 'updateComment'");
-        return commentService.updateComment(adId, commentId, comment);
+        return commentServiceImpl.updateComment(adId, commentId, comment);
     }
 }
