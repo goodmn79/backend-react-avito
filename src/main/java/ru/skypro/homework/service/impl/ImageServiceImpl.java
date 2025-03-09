@@ -29,7 +29,7 @@ import java.nio.file.StandardOpenOption;
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
-    @Value("${application.images.directory}")
+    @Value("${app.image.folder}")
     private String imageDir;
 
     private final ImageRepository imageRepository;
@@ -42,19 +42,20 @@ public class ImageServiceImpl implements ImageService {
      * @throws ErrorImageProcessingException Если не удалось сохранение
      */
     @Override
-    public Image saveImage(MultipartFile file) {
+    public Image saveImage(MultipartFile file, String namePrefix) {
         log.info("Saving an image.");
         Image image = new Image();
-        String path = this.buildFilePath(file);
+        String path = this.buildFileName(file, namePrefix);
         try {
             image.setPath(path)
                     .setSize((int) file.getSize())
                     .setMediaType(file.getContentType())
                     .setData(file.getBytes());
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("{}. Error saving the image, the file is corrupted or unsupported!", e.getMessage());
             throw new ErrorImageProcessingException();
         }
+        log.debug("Saving an image to directory: '{}'.", imageDir);
         this.saveToDir(image);
         Image savedImage = imageRepository.save(image);
         log.info("Saved an image successfully.");
@@ -70,11 +71,12 @@ public class ImageServiceImpl implements ImageService {
      * @throws ErrorImageProcessingException Если не удалось сохранение
      */
     @Override
-    public Image updateImage(MultipartFile file, int id) {
+    public Image updateImage(MultipartFile file, int id, String namePrefix) {
         log.info("Updating an image.");
         Image image = imageRepository.findById(id).orElse(new Image());
-        String path = image.getPath() == null ? this.buildFilePath(file) : image.getPath();
+        String path = image.getPath() == null ? this.buildFileName(file, namePrefix) : image.getPath();
         try {
+            log.warn("Data updating.");
             image.setPath(path)
                     .setSize((int) file.getSize())
                     .setMediaType(file.getContentType())
@@ -103,7 +105,7 @@ public class ImageServiceImpl implements ImageService {
             Image image =
                     imageRepository.findById(imageId)
                             .orElseThrow(ImageNotFoundException::new);
-            String path = image.getPath();
+            String path = imageDir + image.getPath();
             Files.deleteIfExists(Path.of(path));
             imageRepository.delete(image);
             log.info("Image successful removed!");
@@ -113,15 +115,15 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-    private String buildFilePath(MultipartFile file) {
+    private String buildFileName(MultipartFile file, String namePrefix) {
         log.debug("Invoke method 'buildFilePath'");
         String fileName = DataValidator.validatedImage(file);
-        return imageDir + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
+        return namePrefix + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
     }
 
     private void saveToDir(Image image) {
         log.debug("Invoke method 'saveToDir'");
-        String path = image.getPath();
+        String path = imageDir + image.getPath();
         log.debug("Image path: {}", path);
         Path imagePath = Path.of(path);
         try {

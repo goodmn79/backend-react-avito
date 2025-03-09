@@ -25,7 +25,6 @@ import ru.skypro.homework.service.AdService;
  * @version 0.0.1-SNAPSHOT
  */
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
 @RequiredArgsConstructor
@@ -43,7 +42,10 @@ public class AdController {
     @GetMapping
     public Ads getAllAds() {
         log.info("Invoke method 'getAllAds'");
-        return adService.getAllAds();
+        Ads ads = adService.getAllAds();
+        log.info("Returning ads, count: {} pcs.", ads.getCount());
+
+        return ads;
     }
 
     /**

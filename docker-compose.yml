@@ -1,0 +1,20 @@
+services:
+  front:
+    image: ghcr.io/dmitry-bizin/front-react-avito:v1.21
+    container_name: fervent_shaw
+    ports:
+      - "3000:3000"
+    networks:
+      - avito-net
+
+  back:
+    image: avito-backend
+    container_name: avito_back
+    ports:
+      - "8080:8080"
+    networks:
+      - avito-net
+
+networks:
+  avito-net:
+    driver: bridge

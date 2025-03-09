@@ -19,8 +19,8 @@ import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.exception.PasswordDoesNotMatchException;
 import ru.skypro.homework.exception.ErrorImageProcessingException;
+import ru.skypro.homework.exception.PasswordDoesNotMatchException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.repository.UserRepository;
 
@@ -228,7 +228,7 @@ class UserServiceImplTest {
             verify(userRepository, times(1))
                     .save(testEntity);
             verify(imageServiceImpl, times(1))
-                    .saveImage(any(MultipartFile.class));
+                    .saveImage(any(MultipartFile.class), anyString());
         }
 
         @Test
@@ -246,7 +246,7 @@ class UserServiceImplTest {
             verify(userRepository, times(1))
                     .save(testEntity);
             verify(imageServiceImpl, times(1))
-                    .updateImage(any(MultipartFile.class), anyInt());
+                    .updateImage(any(MultipartFile.class), anyInt(), anyString());
         }
 
         @Test
@@ -262,7 +262,7 @@ class UserServiceImplTest {
         void testUpdateOrCreateUserImage_whenUnsuccessfulImageSavingByUpdating_shouldThrowException() {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
-            when(imageServiceImpl.updateImage(any(MultipartFile.class), anyInt()))
+            when(imageServiceImpl.updateImage(any(MultipartFile.class), anyInt(), anyString()))
                     .thenThrow(ErrorImageProcessingException.class);
 
             assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
@@ -274,7 +274,7 @@ class UserServiceImplTest {
             testEntity.setImage(null);
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
-            when(imageServiceImpl.saveImage(any(MultipartFile.class)))
+            when(imageServiceImpl.saveImage(any(MultipartFile.class), anyString()))
                     .thenThrow(ErrorImageProcessingException.class);
 
             assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))

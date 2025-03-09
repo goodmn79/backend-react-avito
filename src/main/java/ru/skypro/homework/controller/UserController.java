@@ -5,20 +5,17 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
-import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.OutputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 /**
  * Контроллер для работы с пользователями.
@@ -30,7 +27,6 @@ import java.nio.file.Path;
  * @version 0.0.1-SNAPSHOT
  */
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -49,6 +45,7 @@ public class UserController {
      */
     @Operation(summary = "Обновление пароля")
     @PostMapping("/set_password")
+    @PreAuthorize("isAuthenticated()")
     public void setPassword(@RequestBody NewPassword newPassword,
                             HttpServletResponse response,
                             HttpServletRequest request) {
@@ -65,6 +62,7 @@ public class UserController {
      */
     @Operation(summary = "Получение информации об авторизованном пользователе")
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public User getUser() {
         log.info("Invoke method 'getUser'");
         return userService.getUser();
@@ -79,6 +77,7 @@ public class UserController {
      */
     @Operation(summary = "Обновление информации об авторизованном пользователе")
     @PatchMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public UpdateUser updateUser(@RequestBody UpdateUser updateUser) {
         log.info("Invoke method 'updateUser'");
         return userService.updateUser(updateUser);
@@ -94,19 +93,10 @@ public class UserController {
             requestBody = @io.swagger.v3.oas.annotations.parameters
                     .RequestBody(content = @Content(mediaType = "multipart/form-data")))
     @PatchMapping("/me/image")
-    public void updateUserImage(@RequestBody MultipartFile image, HttpServletResponse response) {
+    @PreAuthorize("isAuthenticated()")
+    public void updateUserImage(@RequestBody MultipartFile image) {
         log.info("Invoke method 'updateUserImage'");
-        Image userImage = userService.updateOrCreateUserImage(image);
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setContentType(userImage.getMediaType());
-        response.setContentLength(userImage.getSize());
-        Path path = Path.of(userImage.getPath());
-        log.info("Image path: {}", path);
-        try (OutputStream out = response.getOutputStream()) {
-            Files.copy(path, out);
-        } catch (Exception e) {
-            log.error("{}. Image upload error!", e.getMessage());
-        }
+        userService.updateOrCreateUserImage(image);
     }
 }
 

@@ -32,6 +32,7 @@ import ru.skypro.homework.service.UserService;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -105,13 +106,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public Image updateOrCreateUserImage(MultipartFile file) {
-        log.warn("Updating the current user's avatar.");
-        UserEntity user = this.getCurrentUser();
-        Image userImage =
-                user.getImage() == null ?
-                        imageService.saveImage(file) :
-                        imageService.updateImage(file, user.getImage().getId());
 
+        UserEntity user = this.getCurrentUser();
+        Image userImage;
+        String namePrefix = "usr_";
+        if (user.getImage() == null) {
+            log.warn("Saving the current user's avatar.");
+            userImage = imageService.saveImage(file, namePrefix);
+        } else {
+            log.warn("Updating the current user's avatar: '{}'.", user.getImage().getPath());
+            userImage = imageService.updateImage(file, user.getImage().getId(), namePrefix);
+        }
         UserEntity updatedUser = userRepository.save(user.setImage(userImage));
         log.info("Avatar has been successfully updated.");
         return updatedUser.getImage();
@@ -138,9 +143,13 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserEntity getCurrentUser() {
+        log.info("Getting the current user.");
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
-                .orElseThrow(UserNotFoundException::new);
+                .orElseGet(() -> {
+                    log.error("User '{}'not found.", username);
+                    throw new UserNotFoundException();
+                });
     }
 
     private void checkPassword(String password, String actualPassword) {

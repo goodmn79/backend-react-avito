@@ -66,9 +66,7 @@ public class AdServiceImpl implements AdService {
         log.info("Creating an ad...");
         AdEntity entity = adMapper.map(createOrUpdateAd);
 
-        entity
-                .setAuthor(userService.getCurrentUser())
-                .setImage(this.getAdImage(entity.getPk(), image));
+        entity.setImage(this.saveAdImage(image, entity.getPk()));
 
         log.debug("Saving an ad in a database.");
         AdEntity ad = adRepository.save(entity);
@@ -148,7 +146,7 @@ public class AdServiceImpl implements AdService {
     public byte[] updateImage(int pk, MultipartFile image) {
         log.info("Changing the ad image.");
 
-        Image adImage = this.getAdImage(pk, image);
+        Image adImage = this.saveAdImage(image, pk);
 
         log.debug("Saving a new ad image in the database.");
         adRepository.save(this.getAdEntity(pk))
@@ -202,10 +200,16 @@ public class AdServiceImpl implements AdService {
         return adAuthorUsername.equals(currentUsername);
     }
 
-    private Image getAdImage(int pk, MultipartFile image) {
-        AdEntity adEntity = this.getAdEntity(pk);
-        return adEntity.getImage() == null ?
-                imageService.saveImage(image) :
-                imageService.updateImage(image, adEntity.getImage().getId());
+    private Image saveAdImage(MultipartFile image, int pk) {
+        String namePrefix = "ad_";
+        AdEntity adEntity;
+        try {
+            adEntity = this.getAdEntity(pk);
+            log.info("Update ad image in the database.");
+            return imageService.updateImage(image, adEntity.getImage().getId(), namePrefix);
+        } catch (Exception e) {
+            log.info("Savin an ad image in a database.");
+            return imageService.saveImage(image, namePrefix);
+        }
     }
 }

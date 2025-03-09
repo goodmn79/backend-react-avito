@@ -23,5 +23,5 @@ public class Ads {
     private int count;
 
     @Schema(description = "список объявлений")
-    private List<Ad> result;
+    private List<Ad> results;
 }

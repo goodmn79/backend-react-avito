@@ -68,7 +68,7 @@ public class AdMapper {
     public Ads map(List<AdEntity> adEntities) {
         return new Ads()
                 .setCount(adEntities.size())
-                .setResult(adEntities
+                .setResults(adEntities
                         .stream()
                         .map(a -> new Ad()
                                 .setPk(a.getPk())
