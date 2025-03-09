@@ -1,9 +1,8 @@
 package ru.skypro.homework.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import javax.persistence.*;
 
 /**
  * Сущность, представляющая изображение.

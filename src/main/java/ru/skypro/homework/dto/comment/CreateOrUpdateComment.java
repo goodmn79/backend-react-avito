@@ -1,10 +1,9 @@
 package ru.skypro.homework.dto.comment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import javax.validation.constraints.NotBlank;
 
 /**
  * DTO класс для передачи данных комментария.

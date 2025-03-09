@@ -1,9 +1,8 @@
 package ru.skypro.homework.service;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import ru.skypro.homework.dto.user.Register;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Сервис для обработки аутентификации и регистрации пользователей.

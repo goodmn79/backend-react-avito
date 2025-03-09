@@ -1,10 +1,10 @@
 package ru.skypro.homework.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import javax.persistence.*;
 import java.util.List;
 
 /**

@@ -1,10 +1,10 @@
 package ru.skypro.homework.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import ru.skypro.homework.enums.Role;
 
-import javax.persistence.*;
 import java.util.List;
 
 /**
