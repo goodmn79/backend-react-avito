@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,7 +46,7 @@ public class ImageServiceImpl implements ImageService {
     public Image saveImage(MultipartFile file, String namePrefix) {
         log.info("Saving an image.");
         Image image = new Image();
-        String path = this.buildFileName(file, namePrefix);
+        String path = this.createFilePath(file, namePrefix);
         try {
             image.setPath(path)
                     .setSize((int) file.getSize())
@@ -74,7 +75,7 @@ public class ImageServiceImpl implements ImageService {
     public Image updateImage(MultipartFile file, int id, String namePrefix) {
         log.info("Updating an image.");
         Image image = imageRepository.findById(id).orElse(new Image());
-        String path = image.getPath() == null ? this.buildFileName(file, namePrefix) : image.getPath();
+        String path = image.getPath() == null ? this.createFilePath(file, namePrefix) : image.getPath();
         try {
             log.warn("Data updating.");
             image.setPath(path)
@@ -105,7 +106,7 @@ public class ImageServiceImpl implements ImageService {
             Image image =
                     imageRepository.findById(imageId)
                             .orElseThrow(ImageNotFoundException::new);
-            String path = imageDir + image.getPath();
+            String path = StringUtils.substringAfter(image.getPath(), "/");
             Files.deleteIfExists(Path.of(path));
             imageRepository.delete(image);
             log.info("Image successful removed!");
@@ -115,25 +116,25 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-    private String buildFileName(MultipartFile file, String namePrefix) {
+    private String createFilePath(MultipartFile file, String namePrefix) {
         log.debug("Invoke method 'buildFilePath'");
         String fileName = DataValidator.validatedImage(file);
-        return namePrefix + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
+        String pathToFile = imageDir + namePrefix + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
+        return "/" + pathToFile;
     }
 
     private void saveToDir(Image image) {
         log.debug("Invoke method 'saveToDir'");
-        String path = imageDir + image.getPath();
+        String path = StringUtils.substringAfter(image.getPath(), "/");
         log.debug("Image path: {}", path);
-        Path imagePath = Path.of(path);
+        Path pathToImage = Path.of(path);
         try {
-            if (!Files.exists(imagePath)) {
+            if (!Files.exists(pathToImage)) {
                 log.debug("Creating an directory.");
-                Path pathToDir = Path.of(imageDir);
-                Files.createDirectories(pathToDir);
+                Files.createDirectories(Path.of(imageDir));
             }
             Files.write(
-                    imagePath,
+                    pathToImage,
                     image.getData(),
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING

@@ -5,7 +5,7 @@
 CREATE TABLE IF NOT EXISTS images
 (
     id         SERIAL PRIMARY KEY,
-    path       VARCHAR(128)  NOT NULL,
+    path       VARCHAR(128) NOT NULL,
     size       INT          NOT NULL,
     media_type VARCHAR(128) NOT NULL
 );
@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS ads
 CREATE TABLE IF NOT EXISTS comments
 (
     pk        SERIAL PRIMARY KEY,
-    crated_at BIGINT      NOT NULL,
-    text      VARCHAR(32) NOT NULL,
+    crated_at BIGINT NOT NULL,
+    text      TEXT   NOT NULL,
     author_id INT REFERENCES users (id),
     ad_pk     INT REFERENCES ads (pk)
 );
