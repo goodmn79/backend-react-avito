@@ -3,9 +3,9 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-/src/main/resources/application.properties/mvnw
+/src/main/resources/application-dev.properties/mvnw
 
-/src/main/resources/application.properties
+/src/main/resources/application-dev.properties
 .env
 
 
@@ -36,4 +36,4 @@ build/
 
 ### VS Code ###
 .vscode/
-/src/main/resources/application1.properties
+/src/main/resources/application.properties

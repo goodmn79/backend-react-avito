@@ -1,6 +1,7 @@
 package ru.skypro.homework.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
  * @author Powered by ©AYE.team
  * @version 0.0.1-SNAPSHOT
  */
+@Slf4j
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
@@ -63,8 +65,13 @@ public class WebSecurityConfig implements WebMvcConfigurer {
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf()
+        log.warn("Configuring SecurityFilterChain...");
+        http
+                .csrf()
                 .disable()
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("script-src 'self' 'unsafe-eval';")))
                 .authorizeHttpRequests(
                         authorization ->
                                 authorization
@@ -76,6 +83,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .cors()
                 .and()
                 .httpBasic(withDefaults());
+        log.info("SecurityFilterChain configured");
         return http.build();
     }
 
