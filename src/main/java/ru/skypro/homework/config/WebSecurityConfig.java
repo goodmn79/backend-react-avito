@@ -45,13 +45,14 @@ public class WebSecurityConfig implements WebMvcConfigurer {
             "/v3/api-docs",
             "/webjars/**",
             "/login",
-            "/register"
+            "/register",
+            "/images/**"
     };
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:8080"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
@@ -75,8 +76,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AUTH_WHITELIST).permitAll()
-                        .requestMatchers("/users/**").authenticated()
-                        .requestMatchers("/ads/**", "/comments/**").authenticated()
+                        .requestMatchers("/users/**", "/ads/**", "/comments/**").authenticated()
                         .anyRequest().denyAll())
                 .httpBasic(httpBasic -> httpBasic.realmName("Avito authorize"));
 

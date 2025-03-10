@@ -11,9 +11,9 @@ import ru.skypro.homework.entity.Image;
  * @version 0.0.1-SNAPSHOT
  */
 public interface ImageService {
-    Image saveImage(MultipartFile file, String namePrefix);
+    Image saveImage(MultipartFile file);
 
-    Image updateImage(MultipartFile file, int id, String namePrefix);
+    Image updateImage(MultipartFile file, int id);
 
     void removeImage(int imageId);
 }

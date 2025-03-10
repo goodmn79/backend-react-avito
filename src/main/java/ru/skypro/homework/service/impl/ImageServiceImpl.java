@@ -2,7 +2,6 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +29,7 @@ import java.nio.file.StandardOpenOption;
 @Service
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
+
     @Value("${app.image.folder}")
     private String imageDir;
 
@@ -43,10 +43,11 @@ public class ImageServiceImpl implements ImageService {
      * @throws ErrorImageProcessingException Если не удалось сохранение
      */
     @Override
-    public Image saveImage(MultipartFile file, String namePrefix) {
+    public Image saveImage(MultipartFile file) {
         log.info("Saving an image.");
         Image image = new Image();
-        String path = this.createFilePath(file, namePrefix);
+        String path = this.createImageName(file);
+        log.debug("Saving image to path: {}", path);
         try {
             image.setPath(path)
                     .setSize((int) file.getSize())
@@ -72,10 +73,10 @@ public class ImageServiceImpl implements ImageService {
      * @throws ErrorImageProcessingException Если не удалось сохранение
      */
     @Override
-    public Image updateImage(MultipartFile file, int id, String namePrefix) {
+    public Image updateImage(MultipartFile file, int id) {
         log.info("Updating an image.");
         Image image = imageRepository.findById(id).orElse(new Image());
-        String path = image.getPath() == null ? this.createFilePath(file, namePrefix) : image.getPath();
+        String path = image.getPath() == null ? this.createImageName(file) : image.getPath();
         try {
             log.warn("Data updating.");
             image.setPath(path)
@@ -106,8 +107,8 @@ public class ImageServiceImpl implements ImageService {
             Image image =
                     imageRepository.findById(imageId)
                             .orElseThrow(ImageNotFoundException::new);
-            String path = StringUtils.substringAfter(image.getPath(), "/");
-            Files.deleteIfExists(Path.of(path));
+            String path = image.getPath();
+            Files.deleteIfExists(Path.of(imageDir + path));
             imageRepository.delete(image);
             log.info("Image successful removed!");
         } catch (Exception e) {
@@ -116,22 +117,22 @@ public class ImageServiceImpl implements ImageService {
         }
     }
 
-    private String createFilePath(MultipartFile file, String namePrefix) {
+    private String createImageName(MultipartFile file) {
         log.debug("Invoke method 'buildFilePath'");
         String fileName = DataValidator.validatedImage(file);
-        String pathToFile = imageDir + namePrefix + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
-        return "/" + pathToFile;
+        return "/images/" + System.currentTimeMillis() + ImageExtension.getExtension(fileName);
     }
 
     private void saveToDir(Image image) {
         log.debug("Invoke method 'saveToDir'");
-        String path = StringUtils.substringAfter(image.getPath(), "/");
-        log.debug("Image path: {}", path);
-        Path pathToImage = Path.of(path);
+        String file = image.getPath();
+        log.debug("Image path: {}", imageDir + file);
+        Path pathToImage = Path.of(imageDir + file);
+
         try {
             if (!Files.exists(pathToImage)) {
                 log.debug("Creating an directory.");
-                Files.createDirectories(Path.of(imageDir));
+                Files.createDirectories(Path.of(imageDir + "/images"));
             }
             Files.write(
                     pathToImage,
@@ -140,7 +141,7 @@ public class ImageServiceImpl implements ImageService {
                     StandardOpenOption.TRUNCATE_EXISTING
             );
         } catch (Exception e) {
-            log.error("Error saving the image to path: '{}'", path);
+            log.error("Error saving the image to path: '{}'", pathToImage);
             throw new ErrorImageProcessingException();
         }
     }

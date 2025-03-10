@@ -105,21 +105,18 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional
-    public Image updateOrCreateUserImage(MultipartFile file) {
-
+    public void updateOrCreateUserImage(MultipartFile file) {
         UserEntity user = this.getCurrentUser();
         Image userImage;
-        String namePrefix = "usr_";
         if (user.getImage() == null) {
             log.warn("Saving the current user's avatar.");
-            userImage = imageService.saveImage(file, namePrefix);
+            userImage = imageService.saveImage(file);
         } else {
             log.warn("Updating the current user's avatar: '{}'.", user.getImage().getPath());
-            userImage = imageService.updateImage(file, user.getImage().getId(), namePrefix);
+            userImage = imageService.updateImage(file, user.getImage().getId());
         }
-        UserEntity updatedUser = userRepository.save(user.setImage(userImage));
+        userRepository.save(user.setImage(userImage));
         log.info("Avatar has been successfully updated.");
-        return updatedUser.getImage();
     }
 
     /**

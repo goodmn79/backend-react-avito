@@ -6,7 +6,6 @@ import ru.skypro.homework.dto.user.NewPassword;
 import ru.skypro.homework.dto.user.Register;
 import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
-import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 
 /**
@@ -26,7 +25,7 @@ public interface UserService {
     void addUser(Register register);
 
     @Transactional
-    Image updateOrCreateUserImage(MultipartFile file);
+    void updateOrCreateUserImage(MultipartFile file);
 
     boolean userExists(String username);
 

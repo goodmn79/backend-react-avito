@@ -201,15 +201,14 @@ public class AdServiceImpl implements AdService {
     }
 
     private Image saveAdImage(MultipartFile image, int pk) {
-        String namePrefix = "ad_";
         AdEntity adEntity;
         try {
             adEntity = this.getAdEntity(pk);
             log.info("Update ad image in the database.");
-            return imageService.updateImage(image, adEntity.getImage().getId(), namePrefix);
+            return imageService.updateImage(image, adEntity.getImage().getId());
         } catch (Exception e) {
             log.info("Savin an ad image in a database.");
-            return imageService.saveImage(image, namePrefix);
+            return imageService.saveImage(image);
         }
     }
 }

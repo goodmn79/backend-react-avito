@@ -228,7 +228,7 @@ class UserServiceImplTest {
             verify(userRepository, times(1))
                     .save(testEntity);
             verify(imageServiceImpl, times(1))
-                    .saveImage(any(MultipartFile.class), anyString());
+                    .saveImage(any(MultipartFile.class));
         }
 
         @Test
@@ -246,7 +246,7 @@ class UserServiceImplTest {
             verify(userRepository, times(1))
                     .save(testEntity);
             verify(imageServiceImpl, times(1))
-                    .updateImage(any(MultipartFile.class), anyInt(), anyString());
+                    .updateImage(any(MultipartFile.class), anyInt());
         }
 
         @Test
@@ -262,7 +262,7 @@ class UserServiceImplTest {
         void testUpdateOrCreateUserImage_whenUnsuccessfulImageSavingByUpdating_shouldThrowException() {
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
-            when(imageServiceImpl.updateImage(any(MultipartFile.class), anyInt(), anyString()))
+            when(imageServiceImpl.updateImage(any(MultipartFile.class), anyInt()))
                     .thenThrow(ErrorImageProcessingException.class);
 
             assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
@@ -274,7 +274,7 @@ class UserServiceImplTest {
             testEntity.setImage(null);
             when(userRepository.findByUsername(testEntity.getUsername()))
                     .thenReturn(Optional.of(testEntity));
-            when(imageServiceImpl.saveImage(any(MultipartFile.class), anyString()))
+            when(imageServiceImpl.saveImage(any(MultipartFile.class)))
                     .thenThrow(ErrorImageProcessingException.class);
 
             assertThatThrownBy(() -> userServiceImpl.updateOrCreateUserImage(mock(MultipartFile.class)))
