@@ -17,7 +17,7 @@ public class CommentEntity {
     @Column(name = "pk")
     private int pk;
 
-    @Column(name = "createdAt")
+    @Column(name = "created_at")
     private long createdAt;
 
     @Column(name = "text")

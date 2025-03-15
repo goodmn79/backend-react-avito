@@ -10,7 +10,6 @@ import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.service.impl.UserServiceImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -37,7 +36,7 @@ public class CommentMapper {
                 .setAuthor(commentEntity.getAuthor().getId())
                 .setAuthorImage(imagePath)
                 .setAuthorFirstName(commentEntity.getAuthor().getFirstName())
-                .setCreatedAt(commentEntity.getCratedAt())
+                .setCreatedAt(commentEntity.getCreatedAt())
                 .setText(commentEntity.getText());
     }
 
@@ -50,7 +49,7 @@ public class CommentMapper {
     public CommentEntity map(CreateOrUpdateComment comment) {
         return new CommentEntity()
                 .setAuthor(userServiceImpl.getCurrentUser())
-                .setCratedAt(System.currentTimeMillis())
+                .setCreatedAt(System.currentTimeMillis())
                 .setText(DataValidator.validatedData(comment.getText(), 8, 64));
     }
 
@@ -66,6 +65,6 @@ public class CommentMapper {
                 .setResults(comments
                         .stream()
                         .map(this::map)
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
     }
 }

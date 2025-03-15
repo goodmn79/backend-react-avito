@@ -1,9 +1,8 @@
 package ru.skypro.homework.entity;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.experimental.Accessors;
-
-import javax.persistence.*;
 
 /**
  * Сущность, представляющая изображение.
@@ -24,7 +23,7 @@ public class Image {
     @Column(name = "size")
     private long size;
 
-    @Column(name = "mediaType")
+    @Column(name = "media_type")
     private String mediaType;
 
     @Transient

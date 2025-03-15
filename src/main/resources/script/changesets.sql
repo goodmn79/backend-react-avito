@@ -35,10 +35,10 @@ CREATE TABLE IF NOT EXISTS ads
 
 CREATE TABLE IF NOT EXISTS comments
 (
-    pk        SERIAL PRIMARY KEY,
-    crated_at BIGINT NOT NULL,
-    text      TEXT   NOT NULL,
-    author_id INT REFERENCES users (id),
-    ad_pk     INT REFERENCES ads (pk)
+    pk         SERIAL PRIMARY KEY,
+    created_at BIGINT      NOT NULL,
+    text       VARCHAR(32) NOT NULL,
+    author_id  INT REFERENCES users (id),
+    ad_pk      INT REFERENCES ads (pk)
 );
 
