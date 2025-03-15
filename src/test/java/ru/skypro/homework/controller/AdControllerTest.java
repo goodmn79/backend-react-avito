@@ -3,16 +3,19 @@ package ru.skypro.homework.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import ru.skypro.homework.component.mapper.AdMapper;
-import ru.skypro.homework.config.WebSecurityConfig;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
@@ -20,46 +23,55 @@ import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.service.AdService;
-
+import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.service.impl.AdServiceImpl;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-//@ActiveProfiles("test")
-@WebMvcTest(AdController.class)
-@Import(WebSecurityConfig.class)
+@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class AdControllerTest {
-
     @Autowired
+    private WebApplicationContext context;
+
     private MockMvc mockMvc;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private AdService adService;
+    @Mock
+    private AdServiceImpl adService;
 
+    @Mock
+    private AdRepository adRepository;
 
-    private Ads expectedAds;
-    private Ad expectedAd;
-    private ExtendedAd expectedExtendedAd;
+    @Autowired
+    private AdController adController;
+
+    private Ads testAds;
+    private Ad testdAd;
+    private ExtendedAd testExtendedAd;
     private AdEntity adEntity;
-    private CreateOrUpdateAd createOrUpdateAd;
-    private List<AdEntity> adEntities;
+    private CreateOrUpdateAd createdAd;
     private MockMultipartFile testImageFile;
-
-
-
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(adController, "adService", adService);
+        ReflectionTestUtils.setField(adService, "adRepository", adRepository);
+        mockMvc =
+                MockMvcBuilders
+                        .webAppContextSetup(context)
+                        .apply(springSecurity())
+                        .build();
+
+        objectMapper = new ObjectMapper();
 
         UserEntity testUser = new UserEntity()
                 .setId(1)
@@ -72,23 +84,13 @@ class AdControllerTest {
                 .setId(1)
                 .setPath("test-image.jpg");
 
-        testImageFile = new MockMultipartFile(
-                "image", "test.jpg", "image/jpeg", "Test image content".getBytes());
-
-        adEntities = List.of(
-                new AdEntity().setPk(1).setTitle("Test Ad 1").setPrice(100).setAuthor(testUser).setImage(testImagePath),
-                new AdEntity().setPk(2).setTitle("Test Ad 2").setPrice(200).setAuthor(testUser).setImage(testImagePath));
-
-        expectedAds = new Ads()
-                .setCount(adEntities.size())
-                .setResult(adEntities.stream()
-                        .map(a -> new Ad()
-                                .setPk(a.getPk())
-                                .setTitle(a.getTitle())
-                                .setPrice(a.getPrice())
-                                .setAuthor(a.getAuthor().getId())
-                                .setImage(a.getImage().getPath()))
-                        .collect(Collectors.toUnmodifiableList()));
+        testImageFile =
+                new MockMultipartFile(
+                        "image",
+                        "test.jpg",
+                        "image/jpeg",
+                        "Test image content".getBytes()
+                );
 
         adEntity = new AdEntity()
                 .setPk(1)
@@ -98,14 +100,20 @@ class AdControllerTest {
                 .setAuthor(testUser)
                 .setImage(testImagePath);
 
-        expectedAd = new Ad ()
+        List<AdEntity> adEntities = List.of(adEntity);
+
+        testdAd = new Ad()
                 .setPk(adEntity.getPk())
                 .setTitle(adEntity.getTitle())
                 .setPrice(adEntity.getPrice())
                 .setAuthor(adEntity.getAuthor().getId())
                 .setImage(adEntity.getImage().getPath());
 
-        expectedExtendedAd = new ExtendedAd()
+        testAds = new Ads()
+                .setCount(adEntities.size())
+                .setResults(List.of(testdAd));
+
+        testExtendedAd = new ExtendedAd()
                 .setPk(adEntity.getPk())
                 .setImage(adEntity.getImage().getPath())
                 .setPrice(adEntity.getPrice())
@@ -117,26 +125,25 @@ class AdControllerTest {
                 .setEmail(adEntity.getAuthor().getEmail())
                 .setPhone(adEntity.getAuthor().getPhone());
 
-        createOrUpdateAd = new CreateOrUpdateAd()
-                .setTitle("Updated Title")
-                .setDescription("Updated Description")
-                .setPrice(150);
+        createdAd = new CreateOrUpdateAd()
+                .setTitle("title")
+                .setDescription("description")
+                .setPrice(100);
     }
 
     @Test
     @WithMockUser(username = "testUser")
     void getAllAds() throws Exception {
-
-        when(adService.getAllAds()).thenReturn(expectedAds);
+        when(adService.getAllAds()).thenReturn(testAds);
 
         mockMvc.perform(get("/ads"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").value(expectedAds.getCount()))
-                .andExpect(jsonPath("$.result[0].pk").value(expectedAds.getResult().get(0).getPk()))
-                .andExpect(jsonPath("$.result[0].title").value(expectedAds.getResult().get(0).getTitle()))
-                .andExpect(jsonPath("$.result[0].price").value(expectedAds.getResult().get(0).getPrice()))
-                .andExpect(jsonPath("$.result[0].author").value(expectedAds.getResult().get(0).getAuthor()))
-                .andExpect(jsonPath("$.result[0].image").value(expectedAds.getResult().get(0).getImage()));
+                .andExpect(jsonPath("$.count").value(testAds.getCount()))
+                .andExpect(jsonPath("$.results[0].pk").value(testAds.getResults().get(0).getPk()))
+                .andExpect(jsonPath("$.results[0].title").value(testAds.getResults().get(0).getTitle()))
+                .andExpect(jsonPath("$.results[0].price").value(testAds.getResults().get(0).getPrice()))
+                .andExpect(jsonPath("$.results[0].author").value(testAds.getResults().get(0).getAuthor()))
+                .andExpect(jsonPath("$.results[0].image").value(testAds.getResults().get(0).getImage()));
 
         verify(adService).getAllAds();
     }
@@ -144,52 +151,56 @@ class AdControllerTest {
     @Test
     @WithMockUser(username = "testUser")
     void addAd() throws Exception {
-
-        String jsonString = "{\"price\": 123,\"title\": \"Test Ad\", \"description\": \"Test description\"}";
-
-        when(adService.addAd(anyString(), any(MockMultipartFile.class))).thenReturn(expectedAd);
+        String adJson = objectMapper.writeValueAsString(createdAd);
+        when(adService.addAd(any(), any(MockMultipartFile.class))).thenReturn(testdAd);
 
         mockMvc.perform(multipart("/ads")
-                        .file(testImageFile)
-                        .param("properties", jsonString))
+                        .file(new MockMultipartFile("properties", "", "application/json", adJson.getBytes()))
+                        .file(testImageFile))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.pk").value(expectedAd.getPk()))
-                .andExpect(jsonPath("$.title").value(expectedAd.getTitle()))
-                .andExpect(jsonPath("$.price").value(expectedAd.getPrice()))
-                .andExpect(jsonPath("$.author").value(expectedAd.getAuthor()))
-                .andExpect(jsonPath("$.image").value(expectedAd.getImage()));
+                .andExpect(jsonPath("$.pk").value(testdAd.getPk()))
+                .andExpect(jsonPath("$.title").value(testdAd.getTitle()))
+                .andExpect(jsonPath("$.price").value(testdAd.getPrice()))
+                .andExpect(jsonPath("$.author").value(testdAd.getAuthor()))
+                .andExpect(jsonPath("$.image").value(testdAd.getImage()));
 
-        verify(adService).addAd(anyString(), any(MockMultipartFile.class));
+        verify(adService).addAd(eq(createdAd), eq(testImageFile));
     }
 
     @Test
     @WithMockUser(username = "testUser")
     void getAds() throws Exception {
-        when(adService.getAdById(any(Integer.class))).thenReturn(expectedExtendedAd);
+        when(adService.getAdById(anyInt())).thenReturn(testExtendedAd);
 
-        mockMvc.perform(get("/ads/{id}", expectedExtendedAd.getPk()))
+        mockMvc.perform(get("/ads/{id}", testExtendedAd.getPk()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.pk").value(expectedExtendedAd.getPk()))
-                .andExpect(jsonPath("$.image").value(expectedExtendedAd.getImage()))
-                .andExpect(jsonPath("$.title").value(expectedExtendedAd.getTitle()))
-                .andExpect(jsonPath("$.price").value(expectedExtendedAd.getPrice()))
-                .andExpect(jsonPath("$.author").value(expectedExtendedAd.getAuthor()))
-                .andExpect(jsonPath("$.description").value(expectedExtendedAd.getDescription()))
-                .andExpect(jsonPath("$.authorFirstName").value(expectedExtendedAd.getAuthorFirstName()))
-                .andExpect(jsonPath("$.authorLastName").value(expectedExtendedAd.getAuthorLastName()))
-                .andExpect(jsonPath("$.email").value(expectedExtendedAd.getEmail()))
-                .andExpect(jsonPath("$.phone").value(expectedExtendedAd.getPhone()));
+                .andExpect(jsonPath("$.pk").value(testExtendedAd.getPk()))
+                .andExpect(jsonPath("$.image").value(testExtendedAd.getImage()))
+                .andExpect(jsonPath("$.title").value(testExtendedAd.getTitle()))
+                .andExpect(jsonPath("$.price").value(testExtendedAd.getPrice()))
+                .andExpect(jsonPath("$.author").value(testExtendedAd.getAuthor()))
+                .andExpect(jsonPath("$.description").value(testExtendedAd.getDescription()))
+                .andExpect(jsonPath("$.authorFirstName").value(testExtendedAd.getAuthorFirstName()))
+                .andExpect(jsonPath("$.authorLastName").value(testExtendedAd.getAuthorLastName()))
+                .andExpect(jsonPath("$.email").value(testExtendedAd.getEmail()))
+                .andExpect(jsonPath("$.phone").value(testExtendedAd.getPhone()));
 
-        verify(adService).getAdById(expectedExtendedAd.getPk());
+        verify(adService).getAdById(eq(testExtendedAd.getPk()));
     }
 
 
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
-    void removeAdAsAdmin() throws Exception {
-        // метод isAdAuthor не вызывается
-       when(adService.isAdAuthor(anyInt())).thenReturn(false);
+    void removeAd_asAdmin() throws Exception {
+        mockMvc.perform(delete("/ads/{id}", adEntity.getPk()))
+                .andExpect(status().isNoContent());
 
+        verify(adService).removeAdById(eq(adEntity.getPk()));
+    }
+
+    @Test
+    @WithMockUser(username = "user")
+    void removeAd_asAuthor() throws Exception {
         mockMvc.perform(delete("/ads/{id}", this.adEntity.getPk()))
                 .andExpect(status().isNoContent());
 
@@ -197,70 +208,39 @@ class AdControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "testUser")
-    void removeAdAsAuthor() throws Exception {
-
-        mockMvc.perform(delete("/ads/{id}", this.adEntity.getPk()))
-                .andExpect(status().isNoContent());
-
-        verify(adService).removeAdById(adEntity.getPk());
-    }
-
-    /*
-    @Test
-    @WithMockUser(username = "otherUser")
-    void removeAdAsNonAuthor() throws Exception {
-        // метод не вызывается
-        when(adService.isAdAuthor(anyInt())).thenReturn(false);
-
-        doNothing().when(adService).removeAdById(anyInt());
+    @WithAnonymousUser
+    public void removeAd_unauthorized() throws Exception {
 
         mockMvc.perform(delete("/ads/1"))
-                .andExpect(status().isForbidden());
-
-        verify(adService, never()).removeAdById(this.adEntity.getPk());
-    }
-
-     */
-
-    @Test
-    @WithMockUser(username = "testUser")
-    void updateAds() throws Exception{
-
-    when(adService.updateAdById(expectedAd.getPk(), createOrUpdateAd)).thenReturn(expectedAd);
-
-    mockMvc.perform(patch("/ads/{id}", expectedAd.getPk())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(createOrUpdateAd)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.pk").value(expectedAd.getPk()))
-            .andExpect(jsonPath("$.title").value(expectedAd.getTitle()))
-            .andExpect(jsonPath("$.price").value(expectedAd.getPrice()));
-
-        verify(adService).updateAdById(expectedAd.getPk(), createOrUpdateAd);
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username = "testUser")
-    void updateAdsAsAdmin() throws Exception{
+    void updateAds() throws Exception {
+        when(adService.updateAdById(testdAd.getPk(), createdAd)).thenReturn(testdAd);
+
+        mockMvc.perform(patch("/ads/{id}", testdAd.getPk())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createdAd)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.pk").value(testdAd.getPk()))
+                .andExpect(jsonPath("$.title").value(testdAd.getTitle()))
+                .andExpect(jsonPath("$.price").value(testdAd.getPrice()));
+
+        verify(adService).updateAdById(eq(testdAd.getPk()), eq(createdAd));
     }
 
     @Test
-    @WithMockUser(username = "testUser")
-    void updateAdsAsNonAuthor() throws Exception{
-    }
-
-    @Test
-    @WithMockUser(username = "testUser")
+    @WithMockUser(username = "user")
     void getAdsMe() throws Exception {
+        when(adService.getAds()).thenReturn(testAds);
 
-    when(adService.getAds()).thenReturn(expectedAds);
-
-    mockMvc.perform(get("/ads/me"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.count").value(expectedAds.getCount()))
-            .andExpect(jsonPath("$.result").isArray())
-            .andExpect(jsonPath("$.result[0].pk").value(expectedAds.getResult().get(0).getPk()));
+        mockMvc.perform(get("/ads/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.count").value(testAds.getCount()))
+                .andExpect(jsonPath("$.results").isArray())
+                .andExpect(jsonPath("$.results[0].pk").value(testAds.getResults().get(0).getPk()));
 
         verify(adService).getAds();
     }
@@ -270,7 +250,6 @@ class AdControllerTest {
     @WithMockUser(username = "testUser")
     void updateImage() throws Exception {
         int id = 1;
-
         when(adService.updateImage(id, testImageFile)).thenReturn("Updated image content".getBytes());
 
         mockMvc.perform(multipart("/ads/{id}/image", id)
@@ -283,19 +262,6 @@ class AdControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().bytes("Updated image content".getBytes()));
 
-        verify(adService).updateImage(id, testImageFile);
+        verify(adService).updateImage(eq(id), eq(testImageFile));
     }
-
-
-    @Test
-    @WithMockUser(username = "testUser")
-    void updateImageAsAdmin() throws Exception {
-
-    }
-    @Test
-    @WithMockUser(username = "testUser")
-    void updateImageAsNonAuthor() throws Exception {
-
-    }
-
 }

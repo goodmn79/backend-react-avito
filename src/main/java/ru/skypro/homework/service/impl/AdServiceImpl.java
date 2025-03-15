@@ -21,6 +21,7 @@ import ru.skypro.homework.service.ImageService;
 import ru.skypro.homework.service.UserService;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Реализация сервиса для работы с объявлениями.
@@ -181,12 +182,14 @@ public class AdServiceImpl implements AdService {
      */
     @Override
     public AdEntity getAdEntity(int pk) {
-        return
-                adRepository.findById(pk)
-                        .orElseThrow(() -> {
-                            log.error("The ad was not found!");
-                            return new AdNotFoundException();
-                        });
+        log.warn("Search for ads by id = '{}'.", pk);
+        Optional<AdEntity> entity = adRepository.findById(pk);
+        log.info("Found an ad: '{}'.", entity.isPresent());
+        return entity
+                .orElseThrow(() -> {
+                    log.error("The ad was not found!");
+                    return new AdNotFoundException();
+                });
     }
 
     /**

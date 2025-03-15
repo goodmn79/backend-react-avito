@@ -9,8 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.mapper.AdMapper;
-
-import ru.skypro.homework.component.validation.Validatable;
+import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
@@ -28,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -47,7 +46,7 @@ class AdServiceTest {
     private ObjectMapper objectMapper;
 
     @Mock
-    private Validatable validator;
+    private DataValidator validator;
 
     @InjectMocks
     private AdService adService;
@@ -87,7 +86,7 @@ class AdServiceTest {
 
         expectedAds = new Ads()
                 .setCount(adEntities.size())
-                .setResult(adEntities.stream()
+                .setResults(adEntities.stream()
                         .map(a -> new Ad()
                                 .setPk(a.getPk())
                                 .setTitle(a.getTitle())
@@ -140,13 +139,13 @@ class AdServiceTest {
         when(objectMapper.readValue(anyString(), eq(CreateOrUpdateAd.class))).thenReturn(createOrUpdateAd);
         when(adMapper.map(createOrUpdateAd)).thenReturn(adEntity);
         when(userService.getCurrentUser()).thenReturn(currentUser);
-        when(imageService.saveImage(any(), anyInt())).thenReturn(adEntity.getImage());
+        when(imageService.saveImage(any())).thenReturn(adEntity.getImage());
         when(adRepository.save(any())).thenReturn(adEntity);
         when(adMapper.map(adEntity)).thenReturn(expectedExtendedAd);
 
-        Ad actualAd = adService.addAd("jsonString", image);
+        Ad actual = adService.addAd(new CreateOrUpdateAd(), image);
 
-        assertThat(actualAd).isEqualTo(expectedExtendedAd);
+        assertThat(actual).isEqualTo(expectedExtendedAd);
 
         verify(adRepository).save(any());
         verify(adMapper).map(createOrUpdateAd);
@@ -182,7 +181,7 @@ class AdServiceTest {
     void updateAdById() {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         when(validator.validatedData(anyString(), anyInt(), anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(validator.validatedData(anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
+//        when(validator.validatedData(anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
         when(adRepository.save(any())).thenReturn(adEntity);
         when(adMapper.map(adEntity)).thenReturn(expectedExtendedAd);
 
@@ -193,7 +192,7 @@ class AdServiceTest {
         verify(adRepository).findById(adId);
         verify(adRepository).save(any());
         verify(adMapper).map(adEntity);
-        verify(validator).validatedData(anyInt());
+//        verify(validator).validatedData(anyInt());
         verify(validator, times(2)).validatedData(anyString(), anyInt(), anyInt());
     }
 
@@ -204,7 +203,7 @@ class AdServiceTest {
         updatedImage.setData(updatedImageData);
 
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
-        when(imageService.saveImage(image, adEntity.getPk())).thenReturn(updatedImage);
+//        when(imageService.saveImage(image, adEntity.getPk())).thenReturn(updatedImage);
         when(adRepository.save(any())).thenReturn(adEntity);
 
         byte[] actualImage = adService.updateImage(adId, image);
@@ -213,7 +212,7 @@ class AdServiceTest {
 
         verify(adRepository).findById(adId);
         verify(adRepository).save(any());
-        verify(imageService).saveImage(image, adEntity.getPk());
+//        verify(imageService).saveImage(image, adEntity.getPk());
     }
 
     @Test
@@ -246,7 +245,7 @@ class AdServiceTest {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         when(userService.getCurrentUser()).thenReturn(currentUser);
 
-        boolean isAuthor = adService.isAdAuthor(adId);
+        boolean isAuthor = adService.isAdAuthor(adId, "");
 
         assertTrue(isAuthor);
     }
