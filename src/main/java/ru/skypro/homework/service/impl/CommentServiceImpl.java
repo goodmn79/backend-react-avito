@@ -77,9 +77,9 @@ public class CommentServiceImpl implements CommentService {
     public Comment updateComment(int adId, int commentId, CreateOrUpdateComment comment) {
         log.warn("Обновление комментария.");
 
-        CommentEntity adComment = this.getCommentByAdId(adId, commentId);
-
-        adComment.setText(comment.getText());
+        CommentEntity adComment =
+                this.getCommentByAdId(adId, commentId)
+                        .setText(comment.getText());
 
         CommentEntity updatedEntity = commentRepository.save(adComment);
 
@@ -123,24 +123,10 @@ public class CommentServiceImpl implements CommentService {
         return isAuthor;
     }
 
-    /**
-     * Получение всех комментариев объявления.
-     *
-     * @param adId идентификатор объявления
-     * @return список комментариев {@link CommentEntity}
-     */
     private List<CommentEntity> getAdCommentEntities(int adId) {
         return commentRepository.findAllByAdPk(adId);
     }
 
-    /**
-     * Получение комментария объявления.
-     *
-     * @param adId      идентификатор объявления
-     * @param commentId идентификатор комментария
-     * @return объект {@link CommentEntity} содержащий комментарий
-     * @throws CommentNotFoundException Если комментарий не найден
-     */
     private CommentEntity getCommentByAdId(int adId, int commentId) {
         return this.getAdCommentEntities(adId)
                 .stream()
