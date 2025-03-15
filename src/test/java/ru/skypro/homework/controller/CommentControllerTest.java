@@ -1,14 +1,16 @@
 package ru.skypro.homework.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.skypro.homework.dto.comment.Comment;
 import ru.skypro.homework.dto.comment.Comments;
 import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
@@ -23,94 +25,106 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ActiveProfiles("test")
-@WebMvcTest(CommentController.class)
+@ExtendWith(MockitoExtension.class)
 class CommentControllerTest {
+    private static final String USERNAME = "email@email.com";
+    private static final String TEXT = "Comment text";
+    private static final String UPDATED_TEXT = "Updated comment text";
 
-    @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @Mock
     private CommentService commentService;
 
-    private Comment testComment;
+    @InjectMocks
+    private CommentController commentController;
 
+    private ObjectMapper objectMapper;
+    private Comment testComment;
     private Comments comments;
 
     @BeforeEach
     void setUp() {
-        testComment = new Comment();
-        testComment.setPk(1);
-        testComment.setText("Test comment");
+        mockMvc = MockMvcBuilders.standaloneSetup(commentController).build();
 
-        comments = new Comments().setResults(List.of(testComment));
+        objectMapper = new ObjectMapper();
+
+        testComment =
+                new Comment()
+                        .setPk(1)
+                        .setText(TEXT);
+
+        comments =
+                new Comments()
+                        .setCount(1)
+                        .setResults(List.of(testComment));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = USERNAME, roles = "USER")
     void testGetComments() throws Exception {
         when(commentService.getAdComments(1)).thenReturn(comments);
 
         mockMvc.perform(get("/ads/1/comments"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.results[0].text").value("Test comment"));
+                .andExpect(jsonPath("$.results[0].text").value(TEXT));
 
         verify(commentService, times(1)).getAdComments(1);
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = USERNAME, roles = "USER")
     void testAddComment() throws Exception {
-        CreateOrUpdateComment request = new CreateOrUpdateComment();
-        request.setText("New comment");
+        CreateOrUpdateComment request =
+                new CreateOrUpdateComment()
+                        .setText(TEXT);
+        when(commentService.addComment(anyInt(), any(CreateOrUpdateComment.class)))
+                .thenReturn(testComment);
 
-        Comment response = new Comment();
-        response.setText("New comment");
-        response.setPk(1);
-        response.setAuthor(0);
-        response.setCreatedAt(0L);
-
-        when(commentService.addComment(anyInt(),any(CreateOrUpdateComment.class))).thenReturn(response);
-
-
-
-        mockMvc.perform(post("/ads/1/comments")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"text\": \"New comment\"}"))
+        mockMvc
+                .perform(
+                        post("/ads/1/comments")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(
+                                        objectMapper.writeValueAsString(request)
+                                ))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text").value("New comment"));
+                .andExpect(jsonPath("$.text").value(TEXT));
 
-        verify(commentService).addComment(eq(1),argThat(c -> c.getText().equals("New comment")));
-
+        verify(commentService).addComment(eq(1), eq(request));
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
+    @WithMockUser(username = USERNAME, roles = "ADMIN")
     void deleteComment() throws Exception {
-        doNothing().when(commentService).deleteComment(1,1);
+        int adId = 1;
+        int commentId = 1;
+        doNothing().when(commentService).deleteComment(adId, commentId);
 
         mockMvc.perform(delete("/ads/1/comments/1").with(csrf()))
                 .andExpect(status().isOk());
 
-        verify(commentService, times(1)).deleteComment(1,1);
+        verify(commentService, times(1)).deleteComment(eq(adId), eq(commentId));
     }
 
     @Test
-    @WithMockUser(username = "user", roles = "USER")
+    @WithMockUser(username = USERNAME, roles = "USER")
     void updateComment() throws Exception {
-        CreateOrUpdateComment updatedComment = new CreateOrUpdateComment();
-        updatedComment.setText("Updated comment");
-        testComment.setText("Updated comment");
-        when(commentService.updateComment(anyInt(),anyInt(),any(CreateOrUpdateComment.class))).thenReturn(testComment);
+        CreateOrUpdateComment updatedComment =
+                new CreateOrUpdateComment()
+                        .setText(UPDATED_TEXT);
+        when(commentService.updateComment(anyInt(), anyInt(), any(CreateOrUpdateComment.class)))
+                .thenReturn(testComment.setText(UPDATED_TEXT));
 
         mockMvc.perform(patch("/ads/1/comments/1")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"text\": \"Updated comment\"}"))
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedComment)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.text").value("Updated comment"));
+                .andExpect(jsonPath("$.text").value(UPDATED_TEXT));
 
-        verify(commentService, times(1)).updateComment(anyInt(),anyInt(),any(CreateOrUpdateComment.class));
+        verify(commentService, times(1))
+                .updateComment(eq(1), eq(1), eq(updatedComment));
     }
 }
