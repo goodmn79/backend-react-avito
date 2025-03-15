@@ -1,5 +1,8 @@
 package ru.skypro.homework.service.impl;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,20 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.skypro.homework.dto.user.Register;
-import ru.skypro.homework.service.UserService;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceImplTest {
-    @InjectMocks
-    private AuthServiceImpl authService;
-
     @Mock
     private UserDetailServiceImpl userDetailService;
 
@@ -32,7 +27,10 @@ class AuthServiceImplTest {
     private PasswordEncoder encoder;
 
     @Mock
-    private UserService userService;
+    private UserServiceImpl userService;
+
+    @InjectMocks
+    private AuthServiceImpl authService;
 
     private String username;
     private String password;
@@ -52,6 +50,7 @@ class AuthServiceImplTest {
     void testLoginSuccess() {
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetailService.loadUserByUsername(username)).thenReturn(userDetails);
+        when(userService.userExists(anyString())).thenReturn(true);
         when(encoder.matches(password, userDetails.getPassword())).thenReturn(true);
 
         boolean result = authService.login(username, password);
@@ -66,6 +65,7 @@ class AuthServiceImplTest {
     void testLoginFailure() {
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetailService.loadUserByUsername(username)).thenReturn(userDetails);
+        when(userService.userExists(anyString())).thenReturn(true);
         when(encoder.matches(password, userDetails.getPassword())).thenReturn(false);
 
         boolean result = authService.login(username, password);
