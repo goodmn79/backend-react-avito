@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,10 +62,11 @@ public class AdController {
     @Operation(summary = "Добавление объявления")
     @PostMapping(consumes = "multipart/form-data", produces = "application/json")
     @PreAuthorize("isAuthenticated()")
-    public Ad addAd(@RequestPart("properties") CreateOrUpdateAd createOrUpdateAd,
-                    @RequestPart("image") MultipartFile image) {
+    public ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd createOrUpdateAd,
+                                    @RequestPart("image") MultipartFile image) {
         log.info("Invoke method 'addAd'");
-        return adService.addAd(createOrUpdateAd, image);
+        Ad createdAd = adService.addAd(createOrUpdateAd, image);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAd);
     }
 
     /**
@@ -92,9 +95,10 @@ public class AdController {
     @Operation(summary = "Удаление объявления")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN') or @adServiceImpl.isAdAuthor(#id, authentication.principal.username)")
-    public void removeAd(@PathVariable("id") int id) {
+    public ResponseEntity<?> removeAd(@PathVariable("id") int id) {
         log.info("Invoke method 'removeAd'");
         adService.removeAdById(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     /**

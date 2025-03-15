@@ -48,10 +48,10 @@ public interface AdRepository extends JpaRepository<AdEntity, Integer> {
     /**
      * Удаляет объявление по его идентификатору.
      *
-     * @param id идентификатор объявления для удаления (не может быть null)
+     * @param entity объявление для удаления (не может быть null)
      * @throws org.springframework.dao.EmptyResultDataAccessException если объявление с указанным ID не найдено
      */
-    void delete(AdEntity id);
+    void delete(AdEntity entity);
 
     /**
      * Находит объявление по его идентификатору.
