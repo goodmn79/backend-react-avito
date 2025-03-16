@@ -94,7 +94,7 @@ public class AdController {
      */
     @Operation(summary = "Удаление объявления")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN') or @adServiceImpl.isAdAuthor(#id, authentication.principal.username)")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> removeAd(@PathVariable("id") int id) {
         log.info("Invoke method 'removeAd'");
         adService.removeAdById(id);

@@ -52,6 +52,7 @@ public class CommentController {
      */
     @Operation(summary = "Добавление комментария к объявлению")
     @PostMapping("/{id}/comments")
+    @PreAuthorize("isAuthenticated()")
     public Comment addComment(@PathVariable int id, @RequestBody CreateOrUpdateComment comment) {
         log.info("Вызван метод 'addComment'");
         return commentService.addComment(id, comment);
@@ -68,7 +69,7 @@ public class CommentController {
     @Operation(summary = "Удаление комментария",
             operationId = "deleteComment")
     @DeleteMapping("/{adId}/comments/{commentId}")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN') or @commentServiceImpl.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
+    @PreAuthorize("isAuthenticated()")
     public void deleteComment(@PathVariable int adId, @PathVariable int commentId) {
         log.info("Вызван метод 'deleteComment'");
         commentService.deleteComment(adId, commentId);
@@ -86,7 +87,7 @@ public class CommentController {
      */
     @Operation(summary = "Обновление комментария")
     @PatchMapping("/{adId}/comments/{commentId}")
-    @PreAuthorize("@commentServiceImpl.isCommentAuthor(#adId, #commentId, authentication.principal.username)")
+    @PreAuthorize("isAuthenticated()")
     public Comment updateComment(@PathVariable int adId, @PathVariable int commentId, @RequestBody CreateOrUpdateComment comment) {
         log.info("Вызван метод 'updateComment'");
         return commentService.updateComment(adId, commentId, comment);

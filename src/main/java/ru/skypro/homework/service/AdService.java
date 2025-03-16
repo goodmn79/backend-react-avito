@@ -36,5 +36,5 @@ public interface AdService {
 
     AdEntity getAdEntity(int pk);
 
-    boolean isAdAuthor(int pk, String currentUsername);
+    boolean isAdAuthor(int pk);
 }

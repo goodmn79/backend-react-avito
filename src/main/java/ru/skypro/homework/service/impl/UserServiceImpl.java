@@ -15,6 +15,7 @@ import ru.skypro.homework.dto.user.UpdateUser;
 import ru.skypro.homework.dto.user.User;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.exception.PasswordDoesNotMatchException;
 import ru.skypro.homework.exception.UserNotFoundException;
 import ru.skypro.homework.repository.UserRepository;
@@ -147,6 +148,16 @@ public class UserServiceImpl implements UserService {
                     log.error("User '{}'not found.", username);
                     throw new UserNotFoundException();
                 });
+    }
+
+    /**
+     * Проверка роли текущего пользователя на соответствие роли 'ADMIN'.
+     *
+     * @return {@code true}, если текущий пользователь имеет роль 'ADMIN', иначе {@code false}
+     */
+    @Override
+    public boolean isAdmin() {
+        return this.getCurrentUser().getRole().equals(Role.ADMIN);
     }
 
     private void checkPassword(String password, String actualPassword) {

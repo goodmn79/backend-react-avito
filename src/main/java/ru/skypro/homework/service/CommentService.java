@@ -13,5 +13,5 @@ public interface CommentService {
 
     void deleteComment(int adId, int commentId);
 
-    boolean isCommentAuthor(int adId, int commentId, String currentUsername);
+    boolean isCommentAuthor(int adId, int commentId);
 }

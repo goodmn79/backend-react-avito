@@ -14,6 +14,7 @@ import ru.skypro.homework.dto.ad.ExtendedAd;
 import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.exception.AccessNotEnoughException;
 import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdService;
@@ -102,12 +103,18 @@ public class AdServiceImpl implements AdService {
     public void removeAdById(int pk) {
         log.warn("Deleting an ad...");
 
-        AdEntity entity = this.getAdEntity(pk);
-        int imageId = entity.getImage().getId();
+        if (this.isAdAuthor(pk) || userService.isAdmin()) {
+            AdEntity entity = this.getAdEntity(pk);
+            int imageId = entity.getImage().getId();
 
-        imageService.removeImage(imageId);
-        adRepository.deleteById(entity.getPk());
-        log.info("The ad was successfully deleted.");
+            imageService.removeImage(imageId);
+            adRepository.deleteById(entity.getPk());
+            log.info("The ad was successfully deleted.");
+
+        } else {
+            log.error("Access is not enough to remove an ad.");
+            throw new AccessNotEnoughException();
+        }
     }
 
     /**
@@ -120,19 +127,25 @@ public class AdServiceImpl implements AdService {
     @Override
     public Ad updateAdById(int pk, CreateOrUpdateAd createOrUpdateAd) {
         log.info("Request to update the ad.");
-        AdEntity adEntity = this.getAdEntity(pk)
-                .setTitle(
-                        DataValidator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
-                .setDescription(
-                        DataValidator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
-                .setPrice(
-                        DataValidator.validatedPrice(createOrUpdateAd.getPrice()));
 
-        log.debug("Saving ad changes in the database.");
-        AdEntity updatedEntity = adRepository.save(adEntity);
+        if (isAdAuthor(pk)) {
+            AdEntity adEntity = this.getAdEntity(pk)
+                    .setTitle(
+                            DataValidator.validatedData(createOrUpdateAd.getTitle(), 4, 32))
+                    .setDescription(
+                            DataValidator.validatedData(createOrUpdateAd.getDescription(), 8, 64))
+                    .setPrice(
+                            DataValidator.validatedPrice(createOrUpdateAd.getPrice()));
 
-        log.info("The ad has been successfully updated.");
-        return adMapper.map(updatedEntity);
+            log.debug("Saving ad changes in the database.");
+            AdEntity updatedEntity = adRepository.save(adEntity);
+
+            log.info("The ad has been successfully updated.");
+            return adMapper.map(updatedEntity);
+        } else {
+            log.error("Access is not enough to update an ad.");
+            throw new AccessNotEnoughException();
+        }
     }
 
     /**
@@ -147,14 +160,19 @@ public class AdServiceImpl implements AdService {
     public byte[] updateImage(int pk, MultipartFile image) {
         log.info("Changing the ad image.");
 
-        Image adImage = this.saveAdImage(image, pk);
+        if (this.isAdAuthor(pk)) {
+            Image adImage = this.saveAdImage(image, pk);
 
-        log.debug("Saving a new ad image in the database.");
-        adRepository.save(this.getAdEntity(pk))
-                .setImage(adImage);
+            log.debug("Saving a new ad image in the database.");
+            adRepository.save(this.getAdEntity(pk))
+                    .setImage(adImage);
 
-        log.info("The image for the ad has been successfully updated.");
-        return adImage.getData();
+            log.info("The image for the ad has been successfully updated.");
+            return adImage.getData();
+        } else {
+            log.error("Access is not enough to update image of ad.");
+            throw new AccessNotEnoughException();
+        }
     }
 
     /**
@@ -198,9 +216,10 @@ public class AdServiceImpl implements AdService {
      * @return {@code true}, если текущий пользователь является автором объявления, иначе {@code false}
      */
     @Override
-    public boolean isAdAuthor(int pk, String currentUsername) {
+    public boolean isAdAuthor(int pk) {
+        String currentUser = userService.getCurrentUser().getUsername();
         String adAuthorUsername = this.getAdEntity(pk).getAuthor().getUsername();
-        return adAuthorUsername.equals(currentUsername);
+        return adAuthorUsername.equals(currentUser);
     }
 
     private Image saveAdImage(MultipartFile image, int pk) {

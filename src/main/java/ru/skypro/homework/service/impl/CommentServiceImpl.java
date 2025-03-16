@@ -9,10 +9,12 @@ import ru.skypro.homework.dto.comment.Comments;
 import ru.skypro.homework.dto.comment.CreateOrUpdateComment;
 import ru.skypro.homework.entity.AdEntity;
 import ru.skypro.homework.entity.CommentEntity;
+import ru.skypro.homework.exception.AccessNotEnoughException;
 import ru.skypro.homework.exception.CommentNotFoundException;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.service.AdService;
 import ru.skypro.homework.service.CommentService;
+import ru.skypro.homework.service.UserService;
 
 import java.util.List;
 
@@ -30,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
     private final AdService adService;
+    private final UserService userService;
 
     /**
      * Получение комментариев объявления.
@@ -75,16 +78,21 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public Comment updateComment(int adId, int commentId, CreateOrUpdateComment comment) {
-        log.warn("Обновление комментария.");
+        log.warn("Comment update...");
 
-        CommentEntity adComment =
-                this.getCommentByAdId(adId, commentId)
-                        .setText(comment.getText());
+        if (this.isCommentAuthor(adId, commentId)) {
+            CommentEntity adComment =
+                    this.getCommentByAdId(adId, commentId)
+                            .setText(comment.getText());
 
-        CommentEntity updatedEntity = commentRepository.save(adComment);
+            CommentEntity updatedEntity = commentRepository.save(adComment);
 
-        log.info("Комментарий успешно обновлен.");
-        return commentMapper.map(updatedEntity);
+            log.info("The comment is successfully updated.");
+            return commentMapper.map(updatedEntity);
+        } else {
+            log.error("Access is not enough to update an comment");
+            throw new AccessNotEnoughException();
+        }
     }
 
     /**
@@ -95,11 +103,15 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public void deleteComment(int adId, int commentId) {
-        log.warn("Удаление комментария.");
+        log.warn("Comment removal...");
 
-        commentRepository.delete(this.getCommentByAdId(adId, commentId));
-
-        log.info("Комментарий успешно удален.");
+        if (this.isCommentAuthor(adId, commentId) ||  userService.isAdmin()) {
+            commentRepository.delete(this.getCommentByAdId(adId, commentId));
+            log.info("The comment is successfully deleted.");
+        } else {
+            log.error("Access is not enough to remove an comment.");
+            throw new AccessNotEnoughException();
+        }
     }
 
     /**
@@ -108,19 +120,11 @@ public class CommentServiceImpl implements CommentService {
      * @return {@code true}, если текущий пользователь является автором комментария, иначе {@code false}
      */
     @Override
-    public boolean isCommentAuthor(int adId, int commentId, String currentUsername) {
-        String commentAuthorName = this.getCommentByAdId(adId, commentId).getAuthor().getUsername();
+    public boolean isCommentAuthor(int adId, int commentId) {
+        String commentAuthorName =
+                this.getCommentByAdId(adId, commentId).getAuthor().getUsername();
 
-        log.warn("Проверка соответствия имени автора комментария: '{}' и имени текущего пользователя: '{}'.", commentAuthorName, currentUsername);
-
-        boolean isAuthor = commentAuthorName.equals(currentUsername);
-
-        if (isAuthor) {
-            log.info("Доступ к изменению/удалению комментария разрешён.");
-        } else {
-            log.error("Доступ к изменению/удалению комментария запрещён!");
-        }
-        return isAuthor;
+        return commentAuthorName.equals(userService.getCurrentUser().getUsername());
     }
 
     private List<CommentEntity> getAdCommentEntities(int adId) {

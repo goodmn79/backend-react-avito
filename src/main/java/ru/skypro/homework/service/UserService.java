@@ -30,4 +30,6 @@ public interface UserService {
     boolean userExists(String username);
 
     UserEntity getCurrentUser();
+
+    boolean isAdmin();
 }
