@@ -56,7 +56,6 @@ class AuthServiceImplTest {
         boolean result = authService.login(username, password);
 
         assertThat(result).isTrue();
-
         verify(userDetailService).loadUserByUsername(username);
         verify(encoder).matches(password, userDetails.getPassword());
     }
@@ -71,7 +70,6 @@ class AuthServiceImplTest {
         boolean result = authService.login(username, password);
 
         assertThat(result).isFalse();
-
         verify(userDetailService).loadUserByUsername(username);
         verify(encoder).matches(password, userDetails.getPassword());
     }
@@ -83,7 +81,6 @@ class AuthServiceImplTest {
         boolean result = authService.register(register);
 
         assertThat(result).isTrue();
-
         verify(userService).userExists(register.getUsername());
         verify(userService).addUser(register);
     }
@@ -95,7 +92,6 @@ class AuthServiceImplTest {
         boolean result = authService.register(register);
 
         assertThat(result).isFalse();
-
         verify(userService).userExists(register.getUsername());
         verify(userService, never()).addUser(register);
     }
@@ -104,12 +100,9 @@ class AuthServiceImplTest {
     void testClearSecurityContext() {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
-
         HttpSession session = mock(HttpSession.class);
         when(request.getSession(false)).thenReturn(session);
         when(request.getSession()).thenReturn(session);
-
-
         Authentication authentication = mock(Authentication.class);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

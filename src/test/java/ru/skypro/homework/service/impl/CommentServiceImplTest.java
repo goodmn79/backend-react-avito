@@ -35,14 +35,17 @@ class CommentServiceImplTest {
     @Mock
     private AdService adService;
 
+    @Mock
+    private UserServiceImpl userService;
+
     @InjectMocks
     private CommentServiceImpl service;
 
     private CommentEntity comment;
+    private UserEntity currentUser;
     private int adId;
     private int commentId;
     private String text;
-    private String username;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +55,7 @@ class CommentServiceImplTest {
 
         text = "Test comment";
 
-        username = "user@gmail.com";
+        String username = "user@gmail.com";
 
         comment =
                 new CommentEntity()
@@ -61,6 +64,9 @@ class CommentServiceImplTest {
                                 new UserEntity()
                                         .setUsername(username)
                         );
+        currentUser =
+                new UserEntity()
+                        .setUsername(username);
     }
 
     @Test
@@ -117,6 +123,7 @@ class CommentServiceImplTest {
                 new Comment()
                         .setText(newText);
         when(commentRepository.findAllByAdPk(adId)).thenReturn(List.of(comment));
+        when(userService.getCurrentUser()).thenReturn(currentUser);
         when(commentRepository.save(comment)).thenReturn(comment);
         when(commentMapper.map(comment)).thenReturn(expected);
 
@@ -125,7 +132,7 @@ class CommentServiceImplTest {
         assertThat(actual).isNotNull();
         assertThat(expected).isEqualTo(actual);
         assertThat(expected.getText()).isEqualTo(actual.getText());
-        verify(commentRepository).findAllByAdPk(adId);
+        verify(commentRepository, times(2)).findAllByAdPk(adId);
         verify(commentRepository).save(comment);
         verify(commentMapper).map(comment);
     }
@@ -133,11 +140,12 @@ class CommentServiceImplTest {
     @Test
     void deleteComment_whenCommentExist_shouldDeleteThisComment() {
         when(commentRepository.findAllByAdPk(anyInt())).thenReturn(List.of(comment));
+        when(userService.getCurrentUser()).thenReturn(currentUser);
 
         service.deleteComment(adId, commentId);
 
         verify(commentRepository).delete(comment);
-        verify(commentRepository).findAllByAdPk(adId);
+        verify(commentRepository, times(2)).findAllByAdPk(adId);
     }
 
     @Test
@@ -153,8 +161,9 @@ class CommentServiceImplTest {
     @Test
     void isCommentAuthor_whenAuthorMatches_shouldReturnTrue() {
         when(commentRepository.findAllByAdPk(adId)).thenReturn(List.of(comment));
+        when(userService.getCurrentUser()).thenReturn(currentUser);
 
-        boolean actual = service.isCommentAuthor(adId, commentId, username);
+        boolean actual = service.isCommentAuthor(adId, commentId);
 
         assertThat(actual).isTrue();
         verify(commentRepository).findAllByAdPk(adId);
@@ -163,8 +172,9 @@ class CommentServiceImplTest {
     @Test
     void isCommentAuthor_whenAuthorNotMatches_shouldReturnFalse() {
         when(commentRepository.findAllByAdPk(adId)).thenReturn(List.of(comment));
+        when(userService.getCurrentUser()).thenReturn(currentUser.setUsername("another@mail.com"));
 
-        boolean actual = service.isCommentAuthor(adId, commentId, "another@gmail.com");
+        boolean actual = service.isCommentAuthor(adId, commentId);
 
         assertThat(actual).isFalse();
         verify(commentRepository).findAllByAdPk(adId);
@@ -174,7 +184,7 @@ class CommentServiceImplTest {
     void isCommentAuthor_whenCommentNotFound_shouldThrowException() {
         when(commentRepository.findAllByAdPk(adId)).thenReturn(Collections.emptyList());
 
-        assertThatThrownBy(() -> service.isCommentAuthor(adId, commentId, username))
+        assertThatThrownBy(() -> service.isCommentAuthor(adId, commentId))
                 .isInstanceOf(CommentNotFoundException.class);
 
         verify(commentRepository).findAllByAdPk(adId);

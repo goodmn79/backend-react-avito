@@ -1,6 +1,5 @@
-package ru.skypro.homework.service;
+package ru.skypro.homework.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.component.mapper.AdMapper;
-import ru.skypro.homework.component.validation.DataValidator;
 import ru.skypro.homework.dto.ad.Ad;
 import ru.skypro.homework.dto.ad.Ads;
 import ru.skypro.homework.dto.ad.CreateOrUpdateAd;
@@ -19,38 +17,33 @@ import ru.skypro.homework.entity.Image;
 import ru.skypro.homework.entity.UserEntity;
 import ru.skypro.homework.exception.AdNotFoundException;
 import ru.skypro.homework.repository.AdRepository;
+import ru.skypro.homework.service.ImageService;
+import ru.skypro.homework.service.UserService;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AdServiceTest {
     @Mock
     private AdRepository adRepository;
+
     @Mock
     private AdMapper adMapper;
 
     @Mock
     private ImageService imageService;
+
     @Mock
     private UserService userService;
-    @Mock
-    private ObjectMapper objectMapper;
-
-    @Mock
-    private DataValidator validator;
 
     @InjectMocks
-    private AdService adService;
-
+    private AdServiceImpl adService;
 
     private AdEntity adEntity;
     private Ads expectedAds;
@@ -63,18 +56,20 @@ class AdServiceTest {
 
     @BeforeEach
     void setUp() {
-        UserEntity testUser = new UserEntity();
-        testUser.setId(1);
-        testUser.setFirstName("Ivan");
-        testUser.setLastName("Ivanov");
-        testUser.setPhone("+7(999)999-99-99");
-        testUser.setEmail("user@gmail.com");
-        testUser.setUsername("testUser");
-        testUser.setPassword("password");
+        UserEntity testUser = new UserEntity()
+                .setId(1)
+                .setFirstName("Ivan")
+                .setLastName("Ivanov")
+                .setPhone("+7(999)999-99-99")
+                .setEmail("user@gmail.com")
+                .setUsername("testUser")
+                .setPassword("password");
 
         Image testImagePath = new Image()
                 .setId(1)
                 .setPath("test-image.jpg");
+
+        image = mock(MultipartFile.class);
 
         currentUser = new UserEntity()
                 .setId(1)
@@ -93,7 +88,7 @@ class AdServiceTest {
                                 .setPrice(a.getPrice())
                                 .setAuthor(a.getAuthor().getId())
                                 .setImage(a.getImage().getPath()))
-                        .collect(Collectors.toUnmodifiableList()));
+                        .toList());
 
         adEntity = new AdEntity()
                 .setPk(1)
@@ -122,53 +117,47 @@ class AdServiceTest {
     }
 
     @Test
-    void getAllAds() {
+    void getAllAdsTest() {
         when(adMapper.map(List.of(adEntity))).thenReturn(expectedAds);
         when(adRepository.findAll()).thenReturn(List.of(adEntity));
 
         Ads actualAds = adService.getAllAds();
 
         assertThat(actualAds).isEqualTo(expectedAds);
-
         verify(adRepository).findAll();
         verify(adMapper).map(List.of(adEntity));
     }
 
     @Test
-    void addAd() throws IOException {
-        when(objectMapper.readValue(anyString(), eq(CreateOrUpdateAd.class))).thenReturn(createOrUpdateAd);
+    void addAdTest() {
         when(adMapper.map(createOrUpdateAd)).thenReturn(adEntity);
-        when(userService.getCurrentUser()).thenReturn(currentUser);
         when(imageService.saveImage(any())).thenReturn(adEntity.getImage());
         when(adRepository.save(any())).thenReturn(adEntity);
         when(adMapper.map(adEntity)).thenReturn(expectedExtendedAd);
 
-        Ad actual = adService.addAd(new CreateOrUpdateAd(), image);
+        Ad actual = adService.addAd(createOrUpdateAd, image);
 
         assertThat(actual).isEqualTo(expectedExtendedAd);
-
         verify(adRepository).save(any());
         verify(adMapper).map(createOrUpdateAd);
         verify(adMapper).map(adEntity);
     }
 
     @Test
-    void getAdById() {
+    void getAdByIdTest() {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         when(adMapper.map(adEntity)).thenReturn(expectedExtendedAd);
 
         ExtendedAd actualExtendedAd = adService.getAdById(adId);
 
         assertThat(actualExtendedAd).isEqualTo(expectedExtendedAd);
-
         verify(adRepository).findById(adId);
         verify(adMapper).map(adEntity);
     }
 
     @Test
-    void removeAdById() {
+    void removeAdByIdTest() {
         adEntity.setAuthor(currentUser);
-
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
         lenient().when(userService.getCurrentUser()).thenReturn(currentUser);
 
@@ -178,45 +167,41 @@ class AdServiceTest {
     }
 
     @Test
-    void updateAdById() {
+    void updateAdByIdTest() {
+        when(userService.getCurrentUser()).thenReturn(currentUser);
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
-        when(validator.validatedData(anyString(), anyInt(), anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
-//        when(validator.validatedData(anyInt())).thenAnswer(invocation -> invocation.getArgument(0));
         when(adRepository.save(any())).thenReturn(adEntity);
         when(adMapper.map(adEntity)).thenReturn(expectedExtendedAd);
 
         Ad actualAd = adService.updateAdById(adId, createOrUpdateAd);
 
         assertThat(actualAd).isEqualTo(expectedExtendedAd);
-
-        verify(adRepository).findById(adId);
+        verify(adRepository, times(2)).findById(adId);
         verify(adRepository).save(any());
         verify(adMapper).map(adEntity);
-//        verify(validator).validatedData(anyInt());
-        verify(validator, times(2)).validatedData(anyString(), anyInt(), anyInt());
     }
 
     @Test
-    void updateImage() throws IOException {
+    void updateImageTest() {
         byte[] updatedImageData = "Updated image content".getBytes();
-        Image updatedImage = new Image();
-        updatedImage.setData(updatedImageData);
-
+        Image updatedImage =
+                new Image()
+                        .setData(updatedImageData);
+        when(userService.getCurrentUser()).thenReturn(currentUser);
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
-//        when(imageService.saveImage(image, adEntity.getPk())).thenReturn(updatedImage);
+        when(imageService.updateImage(image, adId)).thenReturn(updatedImage);
         when(adRepository.save(any())).thenReturn(adEntity);
 
         byte[] actualImage = adService.updateImage(adId, image);
 
         assertThat(actualImage).isEqualTo(updatedImageData);
-
-        verify(adRepository).findById(adId);
+        verify(adRepository, times(3)).findById(eq(adId));
         verify(adRepository).save(any());
-//        verify(imageService).saveImage(image, adEntity.getPk());
+        verify(imageService).updateImage(eq(image), eq(adId));
     }
 
     @Test
-    void getAds() {
+    void getAdsTest() {
         when(userService.getCurrentUser()).thenReturn(currentUser);
         when(adRepository.findByAuthor(currentUser)).thenReturn(adEntities);
         when(adMapper.map(adEntities)).thenReturn(expectedAds);
@@ -224,30 +209,28 @@ class AdServiceTest {
         Ads actualAds = adService.getAds();
 
         assertThat(actualAds).isEqualTo(expectedAds);
-
-        verify(adRepository).findByAuthor(currentUser);
-        verify(adMapper).map(adEntities);
+        verify(adRepository).findByAuthor(eq(currentUser));
+        verify(adMapper).map(eq(adEntities));
     }
 
     @Test
-    void getAdEntity() {
+    void getAdEntityTest() {
         when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
 
         AdEntity actualEntity = adService.getAdEntity(adId);
 
         assertThat(actualEntity).isEqualTo(adEntity);
-
         verify(adRepository).findById(adId);
     }
 
     @Test
-    void isAdAuthor() {
-        when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
+    void isAdAuthorTest_positive() {
         when(userService.getCurrentUser()).thenReturn(currentUser);
+        when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
 
-        boolean isAuthor = adService.isAdAuthor(adId, "");
+        boolean isAuthor = adService.isAdAuthor(adId);
 
-        assertTrue(isAuthor);
+        assertThat(isAuthor).isTrue();
     }
 
     @Test
@@ -259,42 +242,4 @@ class AdServiceTest {
 
         verify(adRepository).findById(adId);
     }
-
-    //негативные сценарии, когда "не автор"
-/*
-    @Test
-    void testRemoveAdByIdThrowsExceptionWhenNotAuthor() {
-        when(userService.getCurrentUser()).thenReturn(currentUser);
-
-        when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
-        when(adService.isAdAuthor(adId)).thenReturn(false);
-
-        assertThrows(AccessDeniedException.class, () -> adService.removeAdById(adId));
-
-        verify(adRepository).findById(adId);
-    }
-
-    @Test
-    void testUpdateAdByIdThrowsExceptionWhenNotAuthor() {
-        when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
-        when(adService.isAdAuthor(adId)).thenReturn(false);
-
-        assertThrows(AccessDeniedException.class, () -> adService.updateAdById(adId, createOrUpdateAd));
-
-        verify(adRepository).findById(adId);
-
-    }
-
-    @Test
-    void testUpdateImageThrowsExceptionWhenNotAuthor() {
-        when(adRepository.findById(adId)).thenReturn(Optional.of(adEntity));
-        when(adService.isAdAuthor(adId)).thenReturn(false);
-
-        assertThrows(AccessDeniedException.class, () -> adService.updateImage(adId, image));
-
-        verify(adRepository).findById(adId);
-    }
-
- */
-
 }

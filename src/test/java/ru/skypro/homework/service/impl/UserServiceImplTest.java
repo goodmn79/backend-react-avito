@@ -83,7 +83,6 @@ class UserServiceImplTest {
 
         verify(userRepository, times(1))
                 .existsByUsername(testEntity.getUsername());
-
         assertThat(actual).isTrue();
     }
 
@@ -95,7 +94,6 @@ class UserServiceImplTest {
 
         verify(userRepository, times(1))
                 .existsByUsername(testEntity.getUsername());
-
         assertThat(actual).isFalse();
     }
 
@@ -142,7 +140,6 @@ class UserServiceImplTest {
 
             assertThatThrownBy(() -> userServiceImpl.updatePassword(newPassword))
                     .isInstanceOf(PasswordDoesNotMatchException.class);
-
             verify(userRepository, times(1)).findByUsername("username");
         }
 
@@ -156,7 +153,6 @@ class UserServiceImplTest {
 
             assertThatThrownBy(() -> userServiceImpl.updatePassword(newPassword))
                     .isInstanceOf(UserNotFoundException.class);
-
             verify(userRepository, times(1)).findByUsername("username");
         }
 
@@ -170,7 +166,6 @@ class UserServiceImplTest {
 
             verify(userMapper).map(testEntity);
             verify(userRepository, times(1)).findByUsername("username");
-
             assertThat(actual).isNotNull();
             assertThat(actual).isEqualTo(expected);
         }
@@ -181,7 +176,6 @@ class UserServiceImplTest {
 
             assertThatThrownBy(() -> userServiceImpl.getUser())
                     .isInstanceOf(UserNotFoundException.class);
-
             verify(userRepository, times(1)).findByUsername("username");
         }
 
@@ -197,7 +191,6 @@ class UserServiceImplTest {
 
             verify(userMapper).map(expected, testEntity);
             verify(userRepository, times(1)).save(testEntity);
-
             assertThat(actual).isNotNull();
             assertThat(actual).isEqualTo(expected);
         }
@@ -208,7 +201,6 @@ class UserServiceImplTest {
 
             assertThatThrownBy(() -> userServiceImpl.updateUser(mock(UpdateUser.class)))
                     .isInstanceOf(UserNotFoundException.class);
-
             verify(userRepository, times(1)).findByUsername(anyString());
         }
 
@@ -290,7 +282,6 @@ class UserServiceImplTest {
 
             verify(userRepository, times(1))
                     .findByUsername(testEntity.getUsername());
-
             assertThat(actual).isNotNull();
             assertThat(actual).isEqualTo(testEntity);
         }
@@ -301,7 +292,6 @@ class UserServiceImplTest {
 
             assertThatThrownBy(() -> userServiceImpl.getCurrentUser())
                     .isInstanceOf(UserNotFoundException.class);
-
             verify(userRepository, times(1)).findByUsername(anyString());
         }
     }
